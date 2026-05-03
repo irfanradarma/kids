@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Crucial for mobile/tablet scaling and touch interactions -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GRAVITY DROP</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <style>
@@ -19,6 +20,8 @@ body{
   font-family:'Space Mono',monospace;
   min-height:100vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;overflow:hidden;user-select:none;
+  /* Prevent touch actions like pull-to-refresh on mobile */
+  touch-action: none;
 }
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;
@@ -26,35 +29,91 @@ body::before{
     radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,229,255,0.07) 0%,transparent 65%),
     radial-gradient(ellipse 50% 40% at 90% 100%,rgba(255,61,113,0.06) 0%,transparent 60%);
 }
-header{text-align:center;margin-bottom:12px;}
+header{text-align:center;margin-bottom:12px; margin-top: 10px;}
 h1{
-  font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:10px;
+  font-family:'Bebas Neue',sans-serif;font-size: clamp(32px, 8vw, 48px);letter-spacing:10px;
   color:var(--accent);text-shadow:0 0 30px rgba(0,229,255,0.5),0 0 70px rgba(0,229,255,0.2);line-height:1;
 }
-.level-badge{display:inline-flex;align-items:center;gap:8px;margin-top:5px;}
+.level-badge{display:inline-flex;align-items:center;gap:8px;margin-top:5px; flex-wrap: wrap; justify-content: center;}
 .level-pip{width:26px;height:5px;border-radius:3px;background:var(--border);transition:all 0.3s;}
 .level-pip.active{background:var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.6);}
 .level-pip.done{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,0.4);}
 .level-pip.unlocked{cursor:pointer;}
 .level-pip.unlocked:hover{transform:scaleY(1.5);background:var(--accent3);}
 .level-lbl{font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
-.game-wrapper{display:flex;gap:12px;align-items:flex-start;}
-#gameCanvas{display:block;border:1px solid var(--border);border-radius:4px;cursor:crosshair;
-  box-shadow:0 0 0 1px rgba(0,229,255,0.08),0 20px 60px rgba(0,0,0,0.7);}
-.sidebar{width:146px;display:flex;flex-direction:column;gap:9px;}
+
+/* Responsive Layout Overhaul */
+.game-wrapper{
+  display:flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 0 15px 15px 15px;
+}
+
+#gameCanvas{
+  display:block;
+  border:1px solid var(--border);border-radius:4px;cursor:crosshair;
+  box-shadow:0 0 0 1px rgba(0,229,255,0.08),0 20px 60px rgba(0,0,0,0.7);
+  width: 100%;
+  /* Ensures the canvas never gets too large for landscape screens or small phones */
+  max-width: min(100%, 65vh, 540px);
+  aspect-ratio: 1 / 1;
+  touch-action: none; /* Crucial for custom canvas touch drawing */
+}
+
+.sidebar{
+  width: 100%;
+  max-width: min(100%, 65vh, 540px); /* Match canvas width constraints on mobile */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+/* Ensure the hint panel spans both columns on mobile */
+.sidebar .panel:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:11px;}
 .panel-title{font-size:7px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;
   margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border);}
-.toolbar{display:flex;flex-direction:column;gap:4px;}
+  
+/* Toolbar adapts depending on screen space */
+.toolbar{display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;}
 .block-btn{
-  width:100%;height:46px;background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  width: calc(50% - 2px); height:46px;background:rgba(255,255,255,0.03);border:1px solid var(--border);
   border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:7px;padding:0 8px;transition:all 0.12s;
+  /* Prevent selection text highlighting on tap */
+  -webkit-tap-highlight-color: transparent; 
 }
 .block-btn:hover{border-color:var(--accent);background:rgba(0,229,255,0.06);transform:translateX(2px);}
 .block-btn.selected{border-color:var(--accent);background:rgba(0,229,255,0.1);}
 .block-btn.eraser-selected{border-color:var(--accent2);background:rgba(255,61,113,0.1);}
 .block-btn.disabled{opacity:0.25;pointer-events:none;}
 .block-label{font-size:7px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;line-height:1.4;}
+
+/* Media query for larger screens (Tablets in portrait and Desktop) */
+@media(min-width: 768px) {
+  .game-wrapper {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .sidebar {
+    width: 150px;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar .panel:nth-child(3) {
+    grid-column: auto;
+  }
+  .toolbar { flex-direction: column; }
+  .block-btn { width: 100%; }
+}
+
 .btn{
   width:100%;padding:10px 8px;border:1px solid;border-radius:4px;
   font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;
@@ -76,6 +135,7 @@ h1{
 .ball-type{font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .hint{font-size:7px;color:var(--muted);line-height:1.9;letter-spacing:0.3px;}
 .hint strong{color:var(--accent);}
+
 /* Overlays */
 .overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);
@@ -87,12 +147,14 @@ h1{
 .ov-title{
   font-family:'Bebas Neue',sans-serif;letter-spacing:10px;
   text-shadow:0 0 40px currentColor;animation:pulse 1.6s ease-in-out infinite;
+  text-align: center;
 }
-.ov-win{font-size:76px;color:var(--accent3);}
-.ov-level{font-size:52px;color:var(--accent);}
+.ov-win{font-size:clamp(52px, 10vw, 76px);color:var(--accent3);}
+.ov-level{font-size:clamp(40px, 8vw, 52px);color:var(--accent);}
 .ov-sub{
   font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;
   text-align:center;max-width:340px;line-height:2.2;white-space:pre-line;
+  padding: 0 15px;
 }
 .new-pill{
   background:rgba(255,224,102,0.1);border:1px solid rgba(255,224,102,0.35);
@@ -112,7 +174,7 @@ h1{
 .obtn-green{border-color:var(--green);color:var(--green);}
 .obtn-green:hover{background:var(--green);color:var(--bg);}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
-#dragGhost{position:fixed;pointer-events:none;z-index:999;opacity:0.85;display:none;}
+#dragGhost{position:fixed;pointer-events:none;z-index:999;opacity:0.85;display:none; transform-origin: center;}
 </style>
 </head>
 <body>
@@ -125,6 +187,7 @@ h1{
 </header>
 
 <div class="game-wrapper">
+  <!-- Logical canvas always remains 540x540 for Physics math. Visual scale is handled by CSS -->
   <canvas id="gameCanvas" width="540" height="540"></canvas>
   <div class="sidebar">
     <div class="panel">
@@ -168,7 +231,7 @@ h1{
 
 <!-- All done overlay -->
 <div class="overlay" id="doneOv">
-  <div class="ov-title ov-win" style="font-size:60px;letter-spacing:6px;">ALL CLEAR!</div>
+  <div class="ov-title ov-win" style="font-size:clamp(40px, 8vw, 60px);letter-spacing:6px;">ALL CLEAR!</div>
   <div class="ov-sub">All levels conquered.<br>Physics mastered.</div>
   <button class="obtn obtn-cyan" onclick="startLevel(0)">↺ Play Again</button>
 </div>
@@ -176,6 +239,7 @@ h1{
 <script>
 const {Engine,Bodies,Body,World,Events,Composite} = Matter;
 
+// Internal Simulation Size is locked. Scale translates pointer actions natively.
 const CS=540, COLS=9, ROWS=9, CELL=CS/COLS;
 
 // ── Level data ────────────────────────────────────────────────────────────────
@@ -185,14 +249,14 @@ const LEVELS = [
     sub:"",
     ballCol:4, holeCol:4, holeRow:8, holeMoving:false, bouncyBall:false,
     hurdles:[], maxBlocks:3,
-    hint:"<strong>Drag</strong> blocks from toolbar to grid.\n<strong>Click</strong> a placed block to rotate.\nUse the <strong>Eraser</strong> tool to remove.\n<strong>▶ Drop</strong> releases the ball."
+    hint:"<strong>Tap</strong> or drag blocks from the toolbar to grid.\n<strong>Tap</strong> a placed block to rotate.\nUse the <strong>Eraser</strong> tool to remove.\n<strong>▶ Drop</strong> releases the ball."
   },
   {
     id:1, name:"OFF-CENTER", pill:null,
     sub:"",
     ballCol:4, holeCol:0, holeRow:5, holeMoving:false, bouncyBall:false,
     hurdles:[], maxBlocks:4,
-    hint:"The hole is on the <strong>left side</strong>.\n\nUse <strong>Ramp ←</strong> \nto bend the ball's trajectory.\nRotate blocks by clicking them."
+    hint:"The hole is on the <strong>left side</strong>.\n\nUse <strong>Ramp ←</strong> \nto bend the ball's trajectory.\nTap blocks to rotate them."
   },
   {
     id:2, name:"HURDLES", pill:"NEW: Permanent Blocks",
@@ -259,6 +323,18 @@ const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
 const ghostCanvas=document.getElementById('dragGhost');
 const ghostCtx=ghostCanvas.getContext('2d');
+
+// ── Coordinate Normalization for Responsiveness ──────────────────────────────
+// Translates pointer event coordinates (screen pixels) into logical canvas pixels (540x540)
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = CS / rect.width;
+  const scaleY = CS / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
 
 // ── Block types ───────────────────────────────────────────────────────────────
 const BTYPES=[
@@ -477,8 +553,13 @@ function buildToolbar(){
     btn.appendChild(mc);btn.appendChild(lbl);
     
     if(avail){
-      btn.addEventListener('click',()=>{selectedType=i;buildToolbar();});
-      btn.addEventListener('mousedown',e=>{if(gameRunning)return;selectedType=i;startDrag(e,i);});
+      // Support Touch Tap to select & Mouse pointer down to start drag
+      btn.addEventListener('pointerdown', e => { 
+        if(gameRunning) return; 
+        selectedType=i; 
+        buildToolbar(); // Update visuals immediately
+        startDrag(e,i); 
+      });
     }
     tb.appendChild(btn);
   });
@@ -492,35 +573,44 @@ function buildToolbar(){
   ectx.beginPath(); ectx.moveTo(8,8); ectx.lineTo(22,22); ectx.moveTo(22,8); ectx.lineTo(8,22); ectx.stroke();
   const elbl=document.createElement('span');elbl.className='block-label';elbl.textContent='Eraser';
   eBtn.appendChild(ec);eBtn.appendChild(elbl);
-  eBtn.addEventListener('click',()=>{selectedType=-1;buildToolbar();});
+  eBtn.addEventListener('pointerdown',()=>{selectedType=-1;buildToolbar();});
   tb.appendChild(eBtn);
 }
 
-// ── Drag & Drop ───────────────────────────────────────────────────────────────
+// ── Drag & Drop & Tap Mechanics ───────────────────────────────────────────────
 function startDrag(e,type){
   if(type === -1) return;
-  const lvl=LEVELS[currentLevel];
   dragging={type};
   const g=document.getElementById('dragGhost');
-  g.style.display='block';ghostVisible=true;
+  g.style.display='block'; ghostVisible=true;
   ghostCtx.clearRect(0,0,60,60);
   drawBV(ghostCtx,type,60,BTYPES[type].color,0.85);
   moveGhost(e.clientX,e.clientY);
 }
+
 function moveGhost(cx,cy){
   const g=document.getElementById('dragGhost');
-  g.style.left=(cx-30)+'px';g.style.top=(cy-30)+'px';
+  const rect = canvas.getBoundingClientRect();
+  const scale = rect.width / CS; // Scale ghost to match responsive canvas visually
+  g.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  g.style.left = cx + 'px';
+  g.style.top = cy + 'px';
 }
-document.addEventListener('mousemove',e=>{
-  mouseX=e.clientX;mouseY=e.clientY;
-  if(dragging)moveGhost(e.clientX,e.clientY);
+
+document.addEventListener('pointermove', e => {
+  mouseX=e.clientX; mouseY=e.clientY;
+  if(dragging) moveGhost(e.clientX,e.clientY);
 });
-document.addEventListener('mouseup',e=>{
-  if(!dragging)return;
-  document.getElementById('dragGhost').style.display='none';ghostVisible=false;
-  const rect=canvas.getBoundingClientRect();
-  const x=e.clientX-rect.left,y=e.clientY-rect.top;
-  if(x>=0&&x<CS&&y>=0&&y<CS) doPlace(dragging.type,x,y);
+
+document.addEventListener('pointerup', e => {
+  if(!dragging) return;
+  document.getElementById('dragGhost').style.display='none'; ghostVisible=false;
+  
+  // Calculate scaled target drop
+  const pos = getCanvasPos(e);
+  if(pos.x >= 0 && pos.x < CS && pos.y >= 0 && pos.y < CS) {
+    doPlace(dragging.type, pos.x, pos.y);
+  }
   dragging=null;
 });
 
@@ -554,13 +644,17 @@ function doPlace(type,x,y){
   blockCount++;
 }
 
-canvas.addEventListener('click',e=>{
-  if(gameRunning||dragging)return;
-  const rect=canvas.getBoundingClientRect();
-  const col=Math.floor((e.clientX-rect.left)/CELL);
-  const row=Math.floor((e.clientY-rect.top)/CELL);
-  const idx=placedBlocks.findIndex(b=>b.col===col&&b.row===row);
+// Universal unified Interaction on Canvas (handles Mouse click & Touch tap)
+canvas.addEventListener('pointerdown', e => {
+  // If the user was dragging and dropped, this skips handling it twice
+  if(gameRunning || dragging) return; 
   
+  const pos = getCanvasPos(e);
+  const col = Math.floor(pos.x / CELL);
+  const row = Math.floor(pos.y / CELL);
+  const idx = placedBlocks.findIndex(b => b.col === col && b.row === row);
+  
+  // ERASER LOGIC
   if(selectedType === -1) {
       if(idx >= 0) {
           World.remove(world, placedBlocks[idx].body);
@@ -570,25 +664,25 @@ canvas.addEventListener('click',e=>{
       return;
   }
 
-  if(idx === -1) return;
-  const bd=placedBlocks[idx];
-  bd.rotation=(bd.rotation+Math.PI/2)%(Math.PI*2);
-  World.remove(world,bd.body);
-  const nb=makeBlockBody(bd.type,bd.col,bd.row,bd.rotation);
-  if(nb){
-      bd.body=nb;
-      World.add(world,nb);
+  // PLACEMENT AND ROTATION LOGIC
+  if(idx >= 0) {
+      // Rotate if block already exists here
+      const bd = placedBlocks[idx];
+      bd.rotation = (bd.rotation + Math.PI / 2) % (Math.PI * 2);
+      World.remove(world, bd.body);
+      const nb = makeBlockBody(bd.type, bd.col, bd.row, bd.rotation);
+      if(nb) {
+          bd.body = nb;
+          World.add(world, nb);
+      }
+  } else {
+      // Place block via tap on empty space
+      doPlace(selectedType, pos.x, pos.y);
   }
 });
 
-canvas.addEventListener('contextmenu',e=>{
-  e.preventDefault();if(gameRunning)return;
-  const rect=canvas.getBoundingClientRect();
-  const col=Math.floor((e.clientX-rect.left)/CELL);
-  const row=Math.floor((e.clientY-rect.top)/CELL);
-  const idx=placedBlocks.findIndex(b=>b.col===col&&b.row===row);
-  if(idx>=0){World.remove(world,placedBlocks[idx].body);placedBlocks.splice(idx,1);blockCount--;}
-});
+// Disable right click menu natively inside game canvas
+canvas.addEventListener('contextmenu', e => e.preventDefault());
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 document.getElementById('dropBtn').addEventListener('click',()=>{
@@ -596,10 +690,8 @@ document.getElementById('dropBtn').addEventListener('click',()=>{
   gameRunning=true;engine.gravity.y=1.2;Body.setStatic(ball,false);
 });
 
-// Explicit reset handling to clear up confusion
 document.getElementById('resetBtn').addEventListener('click',()=>{startLevel(currentLevel, true);});
 document.getElementById('clearBtn').addEventListener('click',()=>{startLevel(currentLevel, false);});
-
 document.getElementById('nextBtn').addEventListener('click',advanceLevel);
 
 function triggerWin(){
@@ -635,22 +727,19 @@ function render(){
   tickHole();
 
   if(gameRunning && !won) {
-    // Check actual positional movement to avoid fake jittering speed bugs
     const dx = ball.position.x - lastBallPos.x;
     const dy = ball.position.y - lastBallPos.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
     
     if(dist < 0.2) {
       idleFrames++;
-      if(idleFrames > 90) { // roughly 1.5 seconds of physical stillness
-        retryLevel();
-      }
+      if(idleFrames > 90) { retryLevel(); }
     } else {
       idleFrames = 0; 
     }
     lastBallPos = {x: ball.position.x, y: ball.position.y};
     
-    // Out of bounds check: if somehow it flies out to the left, right, or top
+    // Out of bounds check
     if(ball.position.y < -50 || ball.position.x < -50 || ball.position.x > CS + 50) {
       retryLevel();
     }
@@ -696,18 +785,35 @@ function render(){
     ctx.strokeRect(bd.col*CELL+1,bd.row*CELL+1,CELL-2,CELL-2);
   });
 
-  // Eraser hover state
-  if(!gameRunning && selectedType === -1) {
+  // Eraser / Tap placement hover preview
+  if(!gameRunning && mouseX > 0 && mouseY > 0) {
     const rect = canvas.getBoundingClientRect();
-    const mx = mouseX - rect.left, my = mouseY - rect.top;
+    const scaleX = CS / rect.width;
+    const scaleY = CS / rect.height;
+    const mx = (mouseX - rect.left) * scaleX;
+    const my = (mouseY - rect.top) * scaleY;
+    
     if(mx >= 0 && mx < CS && my >= 0 && my < CS) {
         const pc = Math.floor(mx/CELL), pr = Math.floor(my/CELL);
         const bd = placedBlocks.find(b => b.col === pc && b.row === pr);
-        if(bd) {
+        
+        if(selectedType === -1 && bd) {
             ctx.fillStyle = 'rgba(255,61,113,0.35)';
             ctx.fillRect(pc*CELL, pr*CELL, CELL, CELL);
             ctx.strokeStyle = '#ff3d71'; ctx.lineWidth = 2;
             ctx.strokeRect(pc*CELL+2, pr*CELL+2, CELL-4, CELL-4);
+        }
+        else if (selectedType !== -1 && !dragging) {
+            const ok = pr>=0 && pr<ROWS &&
+                       !(pc===lvl.ballCol && pr===0) &&
+                       !(lvl.holeMoving ? pr===hrw : (pc===lvl.holeCol && pr===hrw)) &&
+                       !hurdleBodies.find(h=>h.col===pc&&h.row===pr);
+            const canPlace = ok && (blockCount<lvl.maxBlocks || bd);
+            if(ok) {
+              ctx.strokeStyle=canPlace?'rgba(0,229,255,0.4)':'rgba(255,61,113,0.4)';
+              ctx.lineWidth=2;ctx.strokeRect(pc*CELL+2,pr*CELL+2,CELL-4,CELL-4);
+              if(!bd && canPlace) drawBlockAt(ctx,selectedType,pc*CELL,pr*CELL,CELL,0,0.15);
+            }
         }
     }
   }
@@ -738,25 +844,6 @@ function render(){
   ctx.fillStyle=bouncy?'rgba(255,224,102,0.65)':'rgba(0,229,255,0.55)';
   ctx.font='700 7px Space Mono';ctx.textAlign='center';
   ctx.fillText(bouncy?'BOUNCY':'BALL',bp.x,bp.y-br-5);
-
-  // Drag preview
-  if(dragging&&ghostVisible&&selectedType!==-1){
-    const rect=canvas.getBoundingClientRect();
-    const mx=mouseX-rect.left,my=mouseY-rect.top;
-    if(mx>=0&&mx<CS&&my>=0&&my<CS){
-      const pc=Math.floor(mx/CELL),pr=Math.floor(my/CELL);
-      const ok = pr>=0 && pr<ROWS &&
-                 !(pc===lvl.ballCol && pr===0) &&
-                 !(lvl.holeMoving ? pr===hrw : (pc===lvl.holeCol && pr===hrw)) &&
-                 !hurdleBodies.find(h=>h.col===pc&&h.row===pr);
-      const canPlace=ok&&(blockCount<lvl.maxBlocks||placedBlocks.find(b=>b.col===pc&&b.row===pr));
-      if(ok){
-        ctx.strokeStyle=canPlace?'rgba(0,229,255,0.6)':'rgba(255,61,113,0.6)';
-        ctx.lineWidth=2;ctx.strokeRect(pc*CELL+2,pr*CELL+2,CELL-4,CELL-4);
-        if(canPlace) drawBlockAt(ctx,dragging.type,pc*CELL,pr*CELL,CELL,0,0.38);
-      }
-    }
-  }
 
   requestAnimationFrame(render);
 }

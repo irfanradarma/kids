@@ -245,15 +245,6 @@
       <p>Jatuhkan blok dan atur gravitasi! Selesaikan tiap level dengan strategi yang tepat.</p>
       <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
     </a>
-    
-    <!-- Game 3 (Added for Demo) -->
-    <a class="card" href="#">
-      <div class="card-emoji">🎨</div>
-      <span class="card-tag">Creativity</span>
-      <h2>Color World</h2>
-      <p>Warnai duniamu dengan berbagai pilihan warna ajaib dan simpan karyamu!</p>
-      <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
-    </a>
   </div>
 
   <footer class="footer">
