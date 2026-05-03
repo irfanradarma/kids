@@ -35,19 +35,25 @@ h1{
   color:var(--accent);text-shadow:0 0 30px rgba(0,229,255,0.5),0 0 70px rgba(0,229,255,0.2);line-height:1;
 }
 
+/* Enlarged Mode Buttons */
 .mode-tabs {
-  display: flex; justify-content: center; gap: 16px; margin-top: 12px; margin-bottom: 8px;
+  display: flex; justify-content: center; gap: 20px; margin-top: 15px; margin-bottom: 12px;
 }
 .tab {
-  padding: 10px 28px; font-size: 14px; letter-spacing: 3px; border: 2px solid var(--border);
-  border-radius: 25px; cursor: pointer; transition: all 0.2s; color: var(--muted);
-  text-transform: uppercase; font-weight: 700;
+  padding: 14px 40px; font-size: 18px; letter-spacing: 4px; border: 2px solid var(--border);
+  border-radius: 30px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--muted); text-transform: uppercase; font-weight: 800;
+  background: rgba(255,255,255,0.02);
 }
 .tab.active {
-  background: rgba(0, 229, 255, 0.1); border-color: var(--accent);
-  color: var(--accent); box-shadow: 0 0 15px rgba(0,229,255,0.2);
+  background: rgba(0, 229, 255, 0.15); border-color: var(--accent);
+  color: var(--accent); box-shadow: 0 0 20px rgba(0,229,255,0.3), inset 0 0 10px rgba(0,229,255,0.1);
+  transform: scale(1.05);
 }
-.tab:hover:not(.active) { color: var(--text); border-color: var(--muted); }
+.tab:hover:not(.active) { 
+  color: var(--text); border-color: var(--muted); 
+  background: rgba(255,255,255,0.05); transform: scale(1.02);
+}
 
 .level-badge{display:flex;align-items:center;gap:8px;margin-top:5px; flex-wrap: wrap; justify-content: center; min-height: 12px;}
 .level-pip{width:26px;height:5px;border-radius:3px;background:var(--border);transition:all 0.3s;}
@@ -306,11 +312,11 @@ const CS=540, COLS=9, ROWS=9, CELL=CS/COLS;
 // ── Level data ────────────────────────────────────────────────────────────────
 const LEVELS = [
   { id:0, name:"TUTORIAL", ballCol:4, holeCol:4, holeRow:8, holeMoving:false, bouncyBall:false, hurdles:[], maxBlocks:3, hint:"<strong>Tap</strong> or drag blocks from the toolbar to grid.\n<strong>Tap</strong> a placed block to rotate.\nUse the <strong>Eraser</strong> tool to remove.\n<strong>▶ Drop</strong> releases the ball." },
-  { id:1, name:"OFF-CENTER", ballCol:4, holeCol:0, holeRow:5, holeMoving:false, bouncyBall:false, hurdles:[], maxBlocks:4, hint:"The hole is on the <strong>left side</strong>.\n\nUse <strong>Ramp ←</strong> \nto bend the ball's trajectory.\nTap blocks to rotate them." },
+  { id:1, name:"OFF-CENTER", ballCol:4, holeCol:0, holeRow:5, holeMoving:false, bouncyBall:false, hurdles:[], maxBlocks:4, hint:"The hole is on the <strong>left side</strong>.\n\nUse a <strong>Ramp</strong> and tap to rotate it \nto bend the ball's trajectory." },
   { id:2, name:"HURDLES", ballCol:4, holeCol:8, holeRow:4, holeMoving:false, bouncyBall:false, hurdles:[{col:3,row:3,type:0},{col:4,row:3,type:0},{col:5,row:3,type:0},{col:4,row:5,type:0}], maxBlocks:5, hint:"<strong>🔒 Orange blocks</strong> are fixed.\nYou can't remove or rotate them.\n\nBuild a path around them\nto reach the right-side goal." },
   { id:3, name:"MOVING TARGET", ballCol:4, holeCol:4, holeRow:7, holeMoving:true, holeSpeed:1.5, bouncyBall:false, hurdles:[{col:2,row:3,type:0},{col:6,row:5,type:0},{col:3,row:6,type:0},{col:4,row:6,type:0}], maxBlocks:5, hint:"The <strong>◀ ▶ red goal</strong> is moving!\n\nTime your drop carefully,\nor use blocks to guide the ball\ntoward the center path." },
   { id:4, name:"HURDLES II", ballCol:1, holeCol:8, holeRow:4, holeMoving:false, bouncyBall:true, hurdles:[{col:3,row:5,type:0},{col:4,row:3,type:0},{col:5,row:3,type:0},{col:4,row:5,type:0},{col:6,row:4,type:0}], maxBlocks:4, hint: "<strong>Bouncy ball</strong> — high restitution!\n\nIt will ricochet off surfaces.\nRamps help absorb energy\nand redirect it." },
-  { id:5, name:"BOUNCY BALL", ballCol:4, holeCol:2, holeRow:7, holeMoving:false, bouncyBall:true, hurdles:[{col:1,row:2,type:0},{col:5,row:3,type:1},{col:6,row:5,type:0},{col:2,row:6,type:0},{col:1,row:6,type:2},{col:3,row:6,type:1},{col:1,row:8,type:2},{col:3,row:8,type:1}], maxBlocks:6, hint:"let's be creative" }
+  { id:5, name:"BOUNCY BALL", ballCol:4, holeCol:2, holeRow:7, holeMoving:false, bouncyBall:true, hurdles:[{col:1,row:2,type:0},{col:5,row:3,type:1},{col:6,row:5,type:0},{col:2,row:6,type:0},{col:1,row:6,type:1,rotation:Math.PI*1.5},{col:3,row:6,type:1},{col:1,row:8,type:1,rotation:Math.PI*1.5},{col:3,row:8,type:1}], maxBlocks:6, hint:"let's be creative" }
 ];
 
 const diyLevel = {
@@ -322,7 +328,7 @@ let engine,world,ball,holeSensor;
 let holeVX=0, holeDir=1;
 let placedBlocks=[],hurdleBodies=[];
 let gameRunning=false,won=false;
-let currentLevel=0,maxUnlockedLevel=0;
+let currentLevel=0,maxUnlockedLevel=LEVELS.length-1;
 let gameMode = 'story'; // 'story', 'diy_build', 'diy_play'
 let isCommunityLevel = false;
 let selectedType=0,blockCount=0;
@@ -344,7 +350,7 @@ function getShareableURL() {
     hc: diyLevel.holeCol,
     hr: diyLevel.holeRow,
     bb: diyLevel.bouncyBall,
-    h: diyLevel.hurdles.map(h => ({c: h.col, r: h.row, t: h.type, a: Math.round(h.rotation * 100) / 100}))
+    h: diyLevel.hurdlES?.map(h => ({c: h.col, r: h.row, t: h.type, a: Math.round(h.rotation * 100) / 100})) || diyLevel.hurdles.map(h => ({c: h.col, r: h.row, t: h.type, a: Math.round(h.rotation * 100) / 100}))
   };
   const encoded = btoa(JSON.stringify(data));
   const url = new URL(window.location.href);
@@ -383,11 +389,21 @@ function copyToClipboard(text) {
   document.body.removeChild(temp);
 }
 
+// Fallback logic to safely clear hash without throwing SecurityError in Sandboxed iframes
+function clearURLHash() {
+  try {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+  } catch (e) {
+      try {
+          window.location.hash = '';
+      } catch(err) { console.warn("Could not clear hash completely in sandbox."); }
+  }
+}
+
 // ── Block types ───────────────────────────────────────────────────────────────
 const BTYPES=[
   {id:0,name:'Solid',   color:'#3730a3'},
-  {id:1,name:'Ramp →',  color:'#6d28d9'},
-  {id:2,name:'Ramp ←',  color:'#7e22ce'}
+  {id:1,name:'Ramp',    color:'#6d28d9'}
 ];
 
 function drawBV(c,type,size,color,alpha=1){
@@ -395,8 +411,7 @@ function drawBV(c,type,size,color,alpha=1){
   const m=2.5, s=size-m*2; c.fillStyle=color; c.beginPath();
   if(type===0){ c.roundRect(m,m,s,s,3); } 
   else if(type===1){ c.moveTo(m,m); c.lineTo(size-m,size-m); c.lineTo(m,size-m); c.closePath(); } 
-  else if(type===2){ c.moveTo(size-m,m); c.lineTo(size-m,size-m); c.lineTo(m,size-m); c.closePath(); }
-  if(type>=0 && type<=2){ c.fill(); }
+  if(type>=0 && type<=1){ c.fill(); }
   c.strokeStyle='rgba(255,255,255,0.12)'; c.lineWidth=1; c.stroke();
   c.restore();
 }
@@ -409,7 +424,7 @@ function drawBlockAt(c,type,x,y,size,rot=0,alpha=1,hurdle=false){
 
 function drawToolIcon(c, type, size, alpha=1) {
   c.clearRect(0,0,size,size);
-  if(type >= 0 && type <= 2) { drawBV(c, type, size, '#c2410c', alpha); } // DIY Hurdle
+  if(type >= 0 && type <= 1) { drawBV(c, type, size, '#c2410c', alpha); } // DIY Hurdle
   else if (type === 3) { // Ball Tool
       const br = size*0.35; c.fillStyle = diyLevel.bouncyBall ? '#ffe066' : '#00e5ff'; c.globalAlpha = alpha;
       c.beginPath(); c.arc(size/2, size/2, br, 0, Math.PI*2); c.fill();
@@ -426,7 +441,6 @@ function makeBlockBody(type,col,row,rot=0){
   let body;
   if(type===0){ body=Bodies.rectangle(cx,cy,CELL,CELL,o); } 
   else if(type===1){ body=Bodies.fromVertices(cx,cy,[[{x:-h,y:-h},{x:-h,y:h},{x:h,y:h}]],o,true); } 
-  else if(type===2){ body=Bodies.fromVertices(cx,cy,[[{x:h,y:-h},{x:-h,y:h},{x:h,y:h}]],o,true); }
   if(!body) return null;
   Matter.Body.translate(body, { x: (cx - h) - body.bounds.min.x, y: (cy - h) - body.bounds.min.y });
   if(rot!==0) { Matter.Body.rotate(body, rot, {x: cx, y: cy}); }
@@ -457,11 +471,11 @@ function createPhysics(){
 function setMode(mode) {
   AudioSys.play('click');
   
-  if(mode === 'story' && window.location.hash) {
-      history.replaceState(null, null, ' '); // Clear share hash
+  // Cleanly separate mode states without crashing in iframe sandbox when using replaceState
+  if((mode === 'story' || mode === 'diy_build') && window.location.hash) {
+      clearURLHash();
       isCommunityLevel = false;
   }
-  if(mode === 'diy_build') isCommunityLevel = false;
 
   gameMode = mode;
   document.getElementById('tabStory').className = mode === 'story' ? 'tab active' : 'tab';
@@ -586,12 +600,19 @@ function updateControlButtons() {
 
         shareBtn.style.display = 'none';
 
-        nextBtn.style.display = (gameMode === 'diy_play') ? 'block' : 'none';
         if (gameMode === 'diy_play') {
+            nextBtn.style.display = 'block';
             nextBtn.textContent = "✎ EDIT LEVEL";
             nextBtn.className = "btn btn-reset"; 
             nextBtn.onclick = () => { AudioSys.play('click'); setMode('diy_build'); };
+        } else if (gameMode === 'story') {
+            const hasNext = (currentLevel + 1) <= maxUnlockedLevel && (currentLevel + 1) < LEVELS.length;
+            nextBtn.style.display = hasNext ? 'block' : 'none';
+            nextBtn.textContent = "Next Level →";
+            nextBtn.className = "btn btn-next";
+            nextBtn.onclick = () => { AudioSys.play('click'); startLevel(currentLevel + 1); };
         }
+
         document.getElementById('blocksTitle').textContent = "BLOCKS";
         document.getElementById('controlsTitle').textContent = "CONTROLS";
     }
@@ -677,7 +698,7 @@ function buildToolbar(){
   if(gameMode === 'diy_build') {
       tools = [
           {id:3, name:'Set Ball'}, {id:4, name:'Set Hole'},
-          {id:0, name:'Fix Solid', isH: true}, {id:1, name:'Fix Rmp →', isH: true}, {id:2, name:'Fix Rmp ←', isH: true}
+          {id:0, name:'Fix Solid', isH: true}, {id:1, name:'Fix Ramp', isH: true}
       ];
   } else {
       tools = BTYPES.map(b => ({id: b.id, name: b.name}));
@@ -767,7 +788,7 @@ function handleDIYBuildClick(type, col, row) {
      if(row === 0) { AudioSys.play('place'); diyLevel.ballCol = col; startLevel('diy'); }
   } else if (type === 4) { // Hole
      AudioSys.play('place'); diyLevel.holeCol = col; diyLevel.holeRow = row; startLevel('diy');
-  } else if (type >= 0 && type <= 2) { // Hurdle
+  } else if (type >= 0 && type <= 1) { // Hurdle
      if(col === diyLevel.ballCol && row === 0) return;
      if(col === diyLevel.holeCol && row === diyLevel.holeRow) return;
      const idx = diyLevel.hurdles.findIndex(h => h.col===col && h.row===row);
@@ -932,7 +953,7 @@ function render(){
             } else if (selectedType !== -1 && !dragging) {
                 let ok = true;
                 if(selectedType === 3 && pr !== 0) ok = false; // ball only top
-                if(selectedType >= 0 && selectedType <= 2 && ((pc===lvl.ballCol && pr===0) || (pc===lvl.holeCol && pr===lvl.holeRow))) ok = false;
+                if(selectedType >= 0 && selectedType <= 1 && ((pc===lvl.ballCol && pr===0) || (pc===lvl.holeCol && pr===lvl.holeRow))) ok = false;
                 ctx.strokeStyle=ok?'rgba(255,255,255,0.3)':'rgba(255,61,113,0.4)';
                 ctx.lineWidth=2;ctx.strokeRect(pc*CELL+2,pr*CELL+2,CELL-4,CELL-4);
                 if(ok) drawToolIcon(ctx, selectedType, CELL, 0.3);
