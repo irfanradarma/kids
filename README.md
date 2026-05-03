@@ -44,57 +44,70 @@
       to   { opacity: 1;   transform: scale(1.4); }
     }
 
-    /* ---- LAYOUT ---- */
+    /* ---- RESPONSIVE LAYOUT ---- */
     .container {
       position: relative;
       z-index: 1;
-      max-width: 860px;
+      max-width: 1200px; /* Increased for wider desktop view */
       margin: 0 auto;
-      padding: 40px 20px 80px;
+      padding: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .container { padding: 40px 40px 80px; }
     }
 
     /* ---- HEADER ---- */
     .header {
       text-align: center;
-      margin-bottom: 56px;
+      margin-bottom: 40px;
       animation: fadeDown 0.7s ease both;
     }
+
     .header .planet {
-      font-size: 72px;
+      font-size: clamp(50px, 10vw, 72px); /* Dynamic size */
       display: inline-block;
       animation: bob 3s ease-in-out infinite;
       filter: drop-shadow(0 0 24px rgba(255,200,60,0.5));
     }
+
     @keyframes bob {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-12px); }
     }
+
     .header h1 {
       font-family: 'Fredoka One', cursive;
-      font-size: clamp(2.4rem, 8vw, 4rem);
+      font-size: clamp(2rem, 8vw, 4rem);
       color: var(--white);
       letter-spacing: 1px;
       margin-top: 8px;
       text-shadow: 0 4px 20px rgba(255,230,100,0.4);
     }
+
     .header p {
       color: #b2bec3;
-      font-size: 1.1rem;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
       font-weight: 600;
       margin-top: 8px;
     }
 
-    /* ---- GRID ---- */
+    /* ---- DYNAMIC GRID ---- */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 28px;
+      /* Adapts from 1 column on mobile to multiple on desktop */
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+      gap: 20px;
+    }
+
+    @media (min-width: 1024px) {
+      .games-grid { gap: 32px; }
     }
 
     /* ---- CARD ---- */
     .card {
       border-radius: 24px;
-      padding: 32px 28px 28px;
+      padding: 24px;
       text-decoration: none;
       display: flex;
       flex-direction: column;
@@ -105,59 +118,68 @@
       animation: fadeUp 0.6s ease both;
       cursor: pointer;
     }
-    .card:nth-child(1) { background: var(--card1); animation-delay: 0.15s; }
-    .card:nth-child(2) { background: var(--card2); animation-delay: 0.30s; }
-    .card:nth-child(3) { background: var(--card3); animation-delay: 0.45s; }
-    .card:nth-child(4) { background: var(--card4); animation-delay: 0.60s; }
 
-    .card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 24px 56px rgba(0,0,0,0.35);
+    /* Desktop hover effects only on pointing devices */
+    @media (hover: hover) {
+      .card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 24px 56px rgba(0,0,0,0.35);
+      }
+      .card:hover .card-cta { background: #fff; }
+      .card:hover .card-cta .arrow { transform: translateX(4px); }
     }
 
-    /* blob decoration */
+    .card:nth-child(1) { background: var(--card1); animation-delay: 0.1s; }
+    .card:nth-child(2) { background: var(--card2); animation-delay: 0.2s; }
+    .card:nth-child(3) { background: var(--card3); animation-delay: 0.3s; }
+    .card:nth-child(4) { background: var(--card4); animation-delay: 0.4s; }
+
+    /* Decorative blob */
     .card::before {
       content: '';
       position: absolute;
-      width: 180px;
-      height: 180px;
+      width: 150px;
+      height: 150px;
       background: rgba(255,255,255,0.12);
       border-radius: 50%;
-      top: -60px;
-      right: -40px;
+      top: -40px;
+      right: -30px;
       pointer-events: none;
     }
 
     .card-emoji {
-      font-size: 52px;
+      font-size: 48px;
       line-height: 1;
       filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.2));
     }
+
     .card-tag {
       font-family: 'Fredoka One', cursive;
-      font-size: 0.75rem;
-      letter-spacing: 2px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
       text-transform: uppercase;
       background: rgba(0,0,0,0.18);
       color: rgba(255,255,255,0.9);
-      padding: 3px 10px;
+      padding: 4px 12px;
       border-radius: 99px;
       width: fit-content;
     }
+
     .card h2 {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.9rem;
+      font-size: 1.6rem;
       color: var(--white);
-      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
       line-height: 1.1;
     }
+
     .card p {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: rgba(255,255,255,0.85);
       line-height: 1.5;
       flex: 1;
     }
+
     .card-cta {
       display: inline-flex;
       align-items: center;
@@ -165,47 +187,40 @@
       background: rgba(255,255,255,0.9);
       color: #333;
       font-family: 'Fredoka One', cursive;
-      font-size: 1rem;
-      padding: 10px 20px;
+      font-size: 0.9rem;
+      padding: 10px 18px;
       border-radius: 99px;
       width: fit-content;
-      margin-top: 4px;
-      transition: background 0.2s;
+      margin-top: 8px;
     }
-    .card:hover .card-cta { background: #fff; }
-    .card-cta .arrow { transition: transform 0.2s; }
-    .card:hover .card-cta .arrow { transform: translateX(4px); }
 
     /* ---- FOOTER ---- */
     .footer {
       text-align: center;
-      margin-top: 64px;
+      margin-top: 60px;
       color: #636e72;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      animation: fadeUp 0.6s 0.7s ease both;
+      padding-bottom: 20px;
     }
     .footer a { color: #74b9ff; text-decoration: none; }
-    .footer a:hover { text-decoration: underline; }
 
     /* ---- ANIMATIONS ---- */
     @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-24px); }
+      from { opacity: 0; transform: translateY(-20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(28px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-<!-- Starfield -->
 <div class="stars" id="stars"></div>
 
 <div class="container">
-
   <header class="header">
     <div class="planet">🪐</div>
     <h1>Kids Game Zone</h1>
@@ -213,8 +228,7 @@
   </header>
 
   <div class="games-grid">
-
-    <!-- Game 1: Rocketman -->
+    <!-- Game 1 -->
     <a class="card" href="rocketman.html">
       <div class="card-emoji">🚀</div>
       <span class="card-tag">Logic &amp; Coding</span>
@@ -223,7 +237,7 @@
       <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
     </a>
 
-    <!-- Game 2: Ball Drop -->
+    <!-- Game 2 -->
     <a class="card" href="gravity.html">
       <div class="card-emoji">🌊</div>
       <span class="card-tag">Physics Puzzle</span>
@@ -231,41 +245,59 @@
       <p>Jatuhkan blok dan atur gravitasi! Selesaikan tiap level dengan strategi yang tepat.</p>
       <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
     </a>
-
-    <!-- Placeholder for future games -->
-    <!-- <a class="card" href="nextgame.html">
-      <div class="card-emoji">🧩</div>
-      <span class="card-tag">Coming Soon</span>
-      <h2>Game Baru</h2>
-      <p>Game berikutnya sedang dalam proses. Pantau terus!</p>
-      <div class="card-cta">Segera Hadir <span class="arrow">→</span></div>
-    </a> -->
-
+    
+    <!-- Game 3 (Added for Demo) -->
+    <a class="card" href="#">
+      <div class="card-emoji">🎨</div>
+      <span class="card-tag">Creativity</span>
+      <h2>Color World</h2>
+      <p>Warnai duniamu dengan berbagai pilihan warna ajaib dan simpan karyamu!</p>
+      <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
+    </a>
   </div>
 
   <footer class="footer">
     Made with ❤️ for kids &nbsp;·&nbsp;
     <a href="https://github.com/irfanradarma/kids" target="_blank">View on GitHub</a>
   </footer>
-
 </div>
 
 <script>
-  // Generate random stars
-  const container = document.getElementById('stars');
-  for (let i = 0; i < 120; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const size = Math.random() * 2.5 + 0.5;
-    s.style.cssText = `
-      width:${size}px; height:${size}px;
-      top:${Math.random()*100}%;
-      left:${Math.random()*100}%;
-      --d:${(Math.random()*3+1.5).toFixed(1)}s;
-      animation-delay:${(Math.random()*3).toFixed(1)}s;
-    `;
-    container.appendChild(s);
+  // Dynamic Star Generation based on screen area
+  function generateStars() {
+    const container = document.getElementById('stars');
+    container.innerHTML = ''; // Clear existing stars
+    
+    // Determine number of stars based on screen width
+    const screenWidth = window.innerWidth;
+    let starCount = 60; // Mobile
+    if (screenWidth > 768) starCount = 120; // Tablet
+    if (screenWidth > 1200) starCount = 200; // Desktop
+
+    for (let i = 0; i < starCount; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = Math.random() * 2.5 + 0.5;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        top:${Math.random()*100}%;
+        left:${Math.random()*100}%;
+        --d:${(Math.random()*3+1.5).toFixed(1)}s;
+        animation-delay:${(Math.random()*3).toFixed(1)}s;
+      `;
+      container.appendChild(s);
+    }
   }
+
+  // Initial load
+  generateStars();
+
+  // Refresh stars on window resize to ensure full coverage
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(generateStars, 250);
+  });
 </script>
 </body>
 </html>
