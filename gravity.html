@@ -36,11 +36,11 @@ h1{
 }
 
 .mode-tabs {
-  display: flex; justify-content: center; gap: 12px; margin-top: 8px; margin-bottom: 5px;
+  display: flex; justify-content: center; gap: 16px; margin-top: 12px; margin-bottom: 8px;
 }
 .tab {
-  padding: 6px 20px; font-size: 10px; letter-spacing: 2px; border: 1px solid var(--border);
-  border-radius: 20px; cursor: pointer; transition: all 0.2s; color: var(--muted);
+  padding: 10px 28px; font-size: 14px; letter-spacing: 3px; border: 2px solid var(--border);
+  border-radius: 25px; cursor: pointer; transition: all 0.2s; color: var(--muted);
   text-transform: uppercase; font-weight: 700;
 }
 .tab.active {
@@ -181,6 +181,7 @@ h1{
           <button class="btn btn-reset" id="resetBtn" style="flex:1; padding:10px 0; font-size:8px;" title="Re-drop ball">↺ RETRY</button>
           <button class="btn btn-reset" id="clearBtn" style="flex:1; padding:10px 0; font-size:8px; color:var(--accent2); border-color:#222234;" title="Clear blocks">⨯ CLEAR</button>
         </div>
+        <button class="btn btn-reset" id="shareBtn" style="display:none; padding:10px 0; font-size:8px; color:var(--accent3); border-color:var(--border);" title="Copy Level Link">🔗 SHARE LEVEL</button>
         <button class="btn btn-next" id="nextBtn">Next Level →</button>
       </div>
       <div class="ball-row" id="ballToggleRow" title="Toggle Ball Type (DIY Mode)">
@@ -297,7 +298,6 @@ function spawnWinParticles(x, y) {
   }
 }
 
-
 const {Engine,Bodies,Body,World,Events,Composite} = Matter;
 
 // Internal Simulation Size is locked.
@@ -324,6 +324,7 @@ let placedBlocks=[],hurdleBodies=[];
 let gameRunning=false,won=false;
 let currentLevel=0,maxUnlockedLevel=0;
 let gameMode = 'story'; // 'story', 'diy_build', 'diy_play'
+let isCommunityLevel = false;
 let selectedType=0,blockCount=0;
 let dragging=null,mouseX=0,mouseY=0,ghostVisible=false;
 let idleFrames=0; let lastBallPos={x:0, y:0};
@@ -334,6 +335,52 @@ const ghostCanvas=document.getElementById('dragGhost'); const ghostCtx=ghostCanv
 function getCanvasPos(e) {
   const rect = canvas.getBoundingClientRect();
   return { x: (e.clientX - rect.left) * (CS / rect.width), y: (e.clientY - rect.top) * (CS / rect.height) };
+}
+
+// ── Level Sharing Logic ───────────────────────────────────────────────────────
+function getShareableURL() {
+  const data = {
+    bc: diyLevel.ballCol,
+    hc: diyLevel.holeCol,
+    hr: diyLevel.holeRow,
+    bb: diyLevel.bouncyBall,
+    h: diyLevel.hurdles.map(h => ({c: h.col, r: h.row, t: h.type, a: Math.round(h.rotation * 100) / 100}))
+  };
+  const encoded = btoa(JSON.stringify(data));
+  const url = new URL(window.location.href);
+  url.hash = 'lvl=' + encoded;
+  return url.href;
+}
+
+function loadFromURL() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#lvl=')) {
+    try {
+      const encoded = hash.replace('#lvl=', '');
+      const data = JSON.parse(atob(encoded));
+      diyLevel.ballCol = data.bc ?? 4;
+      diyLevel.holeCol = data.hc ?? 4;
+      diyLevel.holeRow = data.hr ?? 8;
+      diyLevel.bouncyBall = !!data.bb;
+      diyLevel.hurdles = (data.h || []).map(h => ({col: h.c, row: h.r, type: h.t, rotation: h.a || 0}));
+      isCommunityLevel = true;
+      return true;
+    } catch(e) {
+      console.error("Failed to load level from URL", e);
+    }
+  }
+  return false;
+}
+
+function copyToClipboard(text) {
+  const temp = document.createElement('textarea');
+  temp.value = text;
+  temp.style.position = 'fixed';
+  temp.style.opacity = '0';
+  document.body.appendChild(temp);
+  temp.select();
+  try { document.execCommand('copy'); } catch (err) { console.error('Copy failed', err); }
+  document.body.removeChild(temp);
 }
 
 // ── Block types ───────────────────────────────────────────────────────────────
@@ -409,6 +456,13 @@ function createPhysics(){
 
 function setMode(mode) {
   AudioSys.play('click');
+  
+  if(mode === 'story' && window.location.hash) {
+      history.replaceState(null, null, ' '); // Clear share hash
+      isCommunityLevel = false;
+  }
+  if(mode === 'diy_build') isCommunityLevel = false;
+
   gameMode = mode;
   document.getElementById('tabStory').className = mode === 'story' ? 'tab active' : 'tab';
   document.getElementById('tabDIY').className = mode.startsWith('diy') ? 'tab active' : 'tab';
@@ -488,6 +542,7 @@ function updateControlButtons() {
     const dropBtn = document.getElementById('dropBtn');
     const resetBtn = document.getElementById('resetBtn');
     const clearBtn = document.getElementById('clearBtn');
+    const shareBtn = document.getElementById('shareBtn');
     const nextBtn = document.getElementById('nextBtn');
 
     if(gameMode === 'diy_build') {
@@ -500,6 +555,15 @@ function updateControlButtons() {
 
         clearBtn.textContent = "⨯ CLEAR LEVEL";
         clearBtn.onclick = () => { AudioSys.play('erase'); diyLevel.hurdles = []; startLevel('diy', false); };
+
+        shareBtn.style.display = 'block';
+        shareBtn.onclick = () => {
+            AudioSys.play('click');
+            copyToClipboard(getShareableURL());
+            const oldTxt = shareBtn.textContent;
+            shareBtn.textContent = "✓ URL COPIED!";
+            setTimeout(() => { shareBtn.textContent = oldTxt; }, 2000);
+        };
 
         nextBtn.style.display = 'none';
         document.getElementById('blocksTitle').textContent = "DESIGN TOOLS";
@@ -519,6 +583,8 @@ function updateControlButtons() {
 
         clearBtn.textContent = "⨯ CLEAR BLOCKS";
         clearBtn.onclick = () => { AudioSys.play('erase'); startLevel(currentLevel, false); };
+
+        shareBtn.style.display = 'none';
 
         nextBtn.style.display = (gameMode === 'diy_play') ? 'block' : 'none';
         if (gameMode === 'diy_play') {
@@ -570,10 +636,12 @@ function updatePips(){
 function updateHint(){
   if(gameMode === 'diy_build') {
       document.getElementById('hintTitle').textContent = "D.I.Y. EDITOR";
-      document.getElementById('hintBody').innerHTML = "Select tools to place the <strong>Ball</strong>, <strong>Hole</strong>, and fixed <strong>Hurdles</strong>.<br><br>Tap hurdles to rotate.<br>Ball must be on top row.";
+      document.getElementById('hintBody').innerHTML = "Select tools to place the <strong>Ball</strong>, <strong>Hole</strong>, and fixed <strong>Hurdles</strong>.<br><br>Tap hurdles to rotate.<br>Ball must be on top row.<br><br><strong>Share</strong> your level to challenge friends!";
   } else if (gameMode === 'diy_play') {
-      document.getElementById('hintTitle').textContent = "YOUR LEVEL";
-      document.getElementById('hintBody').innerHTML = "Test your creation!<br>Use standard blocks to guide the ball to the hole.";
+      document.getElementById('hintTitle').textContent = isCommunityLevel ? "COMMUNITY LEVEL" : "YOUR LEVEL";
+      document.getElementById('hintBody').innerHTML = isCommunityLevel 
+        ? "Solve this custom shared level!<br>Use standard blocks to guide the ball to the hole." 
+        : "Test your creation!<br>Use standard blocks to guide the ball to the hole.";
   } else {
       const lvl=LEVELS[currentLevel];
       document.getElementById('hintTitle').textContent=`Level ${currentLevel+1} — ${lvl.name}`;
@@ -760,8 +828,8 @@ function triggerWin(){
   
   setTimeout(()=>{
     if(gameMode === 'diy_play') {
-        document.getElementById('winNum').textContent = "D.I.Y. COMPLETE";
-        document.getElementById('winSub').textContent = "Your level is perfectly playable!";
+        document.getElementById('winNum').textContent = isCommunityLevel ? "COMMUNITY LEVEL CLEARED!" : "D.I.Y. COMPLETE";
+        document.getElementById('winSub').textContent = isCommunityLevel ? "Great job!" : "Your level is perfectly playable!";
         document.getElementById('winRetryBtn').style.display = 'block';
         document.getElementById('winNextBtn').textContent = "✎ Edit Level";
         document.getElementById('winNextBtn').onclick = () => { AudioSys.play('click'); setMode('diy_build'); };
@@ -939,7 +1007,11 @@ function render(){
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 initPips();
-startLevel(0);
+if (loadFromURL()) {
+    setMode('diy_play');
+} else {
+    startLevel(0);
+}
 render();
 </script>
 </body>
