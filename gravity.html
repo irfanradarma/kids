@@ -29,12 +29,27 @@ body::before{
     radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,229,255,0.07) 0%,transparent 65%),
     radial-gradient(ellipse 50% 40% at 90% 100%,rgba(255,61,113,0.06) 0%,transparent 60%);
 }
-header{text-align:center;margin-bottom:12px; margin-top: 10px;}
+header{text-align:center;margin-bottom:8px; margin-top: 10px; width: 100%;}
 h1{
   font-family:'Bebas Neue',sans-serif;font-size: clamp(32px, 8vw, 48px);letter-spacing:10px;
   color:var(--accent);text-shadow:0 0 30px rgba(0,229,255,0.5),0 0 70px rgba(0,229,255,0.2);line-height:1;
 }
-.level-badge{display:inline-flex;align-items:center;gap:8px;margin-top:5px; flex-wrap: wrap; justify-content: center;}
+
+.mode-tabs {
+  display: flex; justify-content: center; gap: 12px; margin-top: 8px; margin-bottom: 5px;
+}
+.tab {
+  padding: 6px 20px; font-size: 10px; letter-spacing: 2px; border: 1px solid var(--border);
+  border-radius: 20px; cursor: pointer; transition: all 0.2s; color: var(--muted);
+  text-transform: uppercase; font-weight: 700;
+}
+.tab.active {
+  background: rgba(0, 229, 255, 0.1); border-color: var(--accent);
+  color: var(--accent); box-shadow: 0 0 15px rgba(0,229,255,0.2);
+}
+.tab:hover:not(.active) { color: var(--text); border-color: var(--muted); }
+
+.level-badge{display:flex;align-items:center;gap:8px;margin-top:5px; flex-wrap: wrap; justify-content: center; min-height: 12px;}
 .level-pip{width:26px;height:5px;border-radius:3px;background:var(--border);transition:all 0.3s;}
 .level-pip.active{background:var(--accent);box-shadow:0 0 8px rgba(0,229,255,0.6);}
 .level-pip.done{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,0.4);}
@@ -44,48 +59,27 @@ h1{
 
 /* Responsive Layout Overhaul */
 .game-wrapper{
-  display:flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 0 15px 15px 15px;
+  display:flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; padding: 0 15px 15px 15px;
 }
 
 #gameCanvas{
-  display:block;
-  border:1px solid var(--border);border-radius:4px;cursor:crosshair;
-  box-shadow:0 0 0 1px rgba(0,229,255,0.08),0 20px 60px rgba(0,0,0,0.7);
-  width: 100%;
-  /* Ensures the canvas never gets too large for landscape screens or small phones */
-  max-width: min(100%, 65vh, 540px);
-  aspect-ratio: 1 / 1;
-  touch-action: none; /* Crucial for custom canvas touch drawing */
+  display:block; border:1px solid var(--border);border-radius:4px;cursor:crosshair;
+  box-shadow:0 0 0 1px rgba(0,229,255,0.08),0 20px 60px rgba(0,0,0,0.7); width: 100%;
+  max-width: min(100%, 65vh, 540px); aspect-ratio: 1 / 1; touch-action: none; 
 }
 
 .sidebar{
-  width: 100%;
-  max-width: min(100%, 65vh, 540px); /* Match canvas width constraints on mobile */
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
+  width: 100%; max-width: min(100%, 65vh, 540px); display: grid; grid-template-columns: 1fr 1fr; gap: 9px;
 }
-
-/* Ensure the hint panel spans both columns on mobile */
-.sidebar .panel:nth-child(3) {
-  grid-column: 1 / -1;
-}
-
+.sidebar .panel:nth-child(3) { grid-column: 1 / -1; }
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:11px;}
 .panel-title{font-size:7px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;
   margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border);}
   
-/* Toolbar adapts depending on screen space */
 .toolbar{display:flex;flex-direction:row;flex-wrap:wrap;gap:4px;}
 .block-btn{
   width: calc(50% - 2px); height:46px;background:rgba(255,255,255,0.03);border:1px solid var(--border);
   border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:7px;padding:0 8px;transition:all 0.12s;
-  /* Prevent selection text highlighting on tap */
   -webkit-tap-highlight-color: transparent; 
 }
 .block-btn:hover{border-color:var(--accent);background:rgba(0,229,255,0.06);transform:translateX(2px);}
@@ -94,22 +88,10 @@ h1{
 .block-btn.disabled{opacity:0.25;pointer-events:none;}
 .block-label{font-size:7px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;line-height:1.4;}
 
-/* Media query for larger screens (Tablets in portrait and Desktop) */
 @media(min-width: 768px) {
-  .game-wrapper {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-  }
-  .sidebar {
-    width: 150px;
-    max-width: none;
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar .panel:nth-child(3) {
-    grid-column: auto;
-  }
+  .game-wrapper { flex-direction: row; align-items: flex-start; justify-content: center; }
+  .sidebar { width: 150px; max-width: none; display: flex; flex-direction: column; }
+  .sidebar .panel:nth-child(3) { grid-column: auto; }
   .toolbar { flex-direction: column; }
   .block-btn { width: 100%; }
 }
@@ -126,7 +108,8 @@ h1{
 .btn-reset:hover{border-color:var(--accent2);color:var(--accent2);}
 .btn-next{background:var(--green);border-color:var(--green);color:var(--bg);display:none;}
 .btn-next:hover{background:transparent;color:var(--green);}
-.ball-row{display:flex;align-items:center;gap:7px;padding-top:8px;}
+.ball-row{display:flex;align-items:center;gap:7px;padding:8px 4px 0 4px; transition: 0.2s; border-radius:4px;}
+.ball-row:hover{background: rgba(255,255,255,0.05);}
 .ball-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;
   background:radial-gradient(circle at 35% 35%,#80f7ff,#00e5ff 50%,#0077aa);
   box-shadow:0 0 7px rgba(0,229,255,0.5);transition:all 0.3s;}
@@ -146,20 +129,12 @@ h1{
 .ov-lnum{font-size:10px;letter-spacing:4px;color:var(--muted);}
 .ov-title{
   font-family:'Bebas Neue',sans-serif;letter-spacing:10px;
-  text-shadow:0 0 40px currentColor;animation:pulse 1.6s ease-in-out infinite;
-  text-align: center;
+  text-shadow:0 0 40px currentColor;animation:pulse 1.6s ease-in-out infinite; text-align: center;
 }
 .ov-win{font-size:clamp(52px, 10vw, 76px);color:var(--accent3);}
-.ov-level{font-size:clamp(40px, 8vw, 52px);color:var(--accent);}
 .ov-sub{
   font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;
-  text-align:center;max-width:340px;line-height:2.2;white-space:pre-line;
-  padding: 0 15px;
-}
-.new-pill{
-  background:rgba(255,224,102,0.1);border:1px solid rgba(255,224,102,0.35);
-  border-radius:20px;padding:4px 12px;font-size:7px;letter-spacing:3px;
-  color:var(--accent3);text-transform:uppercase;
+  text-align:center;max-width:340px;line-height:2.2;white-space:pre-line; padding: 0 15px;
 }
 .ov-btns{display:flex;gap:10px;margin-top:8px;}
 .obtn{
@@ -181,30 +156,34 @@ h1{
 
 <header>
   <h1>GRAVITY DROP</h1>
+  <div class="mode-tabs">
+    <div class="tab active" id="tabStory">STORY MODE</div>
+    <div class="tab" id="tabDIY">D.I.Y. MODE</div>
+  </div>
   <div class="level-badge" id="levelBadge">
-    <span class="level-lbl">Level</span>
+    <!-- Pips injected here in story mode -->
   </div>
 </header>
 
 <div class="game-wrapper">
-  <!-- Logical canvas always remains 540x540 for Physics math. Visual scale is handled by CSS -->
+  <!-- Logical canvas always remains 540x540 -->
   <canvas id="gameCanvas" width="540" height="540"></canvas>
   <div class="sidebar">
     <div class="panel">
-      <div class="panel-title">Blocks</div>
+      <div class="panel-title" id="blocksTitle">Blocks</div>
       <div class="toolbar" id="toolbar"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">Controls</div>
+      <div class="panel-title" id="controlsTitle">Controls</div>
       <div style="display:flex;flex-direction:column;gap:6px;">
         <button class="btn btn-drop" id="dropBtn">▶ Drop</button>
         <div style="display:flex; gap:6px;">
-          <button class="btn btn-reset" id="resetBtn" style="flex:1; padding:10px 0; font-size:8px;" title="Re-drop ball (Keep blocks)">↺ RETRY</button>
-          <button class="btn btn-reset" id="clearBtn" style="flex:1; padding:10px 0; font-size:8px; color:var(--accent2); border-color:#222234;" title="Clear all placed blocks">⨯ CLEAR</button>
+          <button class="btn btn-reset" id="resetBtn" style="flex:1; padding:10px 0; font-size:8px;" title="Re-drop ball">↺ RETRY</button>
+          <button class="btn btn-reset" id="clearBtn" style="flex:1; padding:10px 0; font-size:8px; color:var(--accent2); border-color:#222234;" title="Clear blocks">⨯ CLEAR</button>
         </div>
         <button class="btn btn-next" id="nextBtn">Next Level →</button>
       </div>
-      <div class="ball-row">
+      <div class="ball-row" id="ballToggleRow" title="Toggle Ball Type (DIY Mode)">
         <div class="ball-dot" id="ballDot"></div>
         <span class="ball-type" id="ballType">Standard</span>
       </div>
@@ -224,7 +203,7 @@ h1{
   <div class="ov-title ov-win">YOU WIN!</div>
   <div class="ov-sub" id="winSub"></div>
   <div class="ov-btns">
-    <button class="obtn obtn-gold" onclick="retryLevel()">↺ Retry</button>
+    <button class="obtn obtn-gold" id="winRetryBtn" onclick="retryLevel()">↺ Retry</button>
     <button class="obtn obtn-green" id="winNextBtn" onclick="advanceLevel()">Next Level →</button>
   </div>
 </div>
@@ -233,107 +212,128 @@ h1{
 <div class="overlay" id="doneOv">
   <div class="ov-title ov-win" style="font-size:clamp(40px, 8vw, 60px);letter-spacing:6px;">ALL CLEAR!</div>
   <div class="ov-sub">All levels conquered.<br>Physics mastered.</div>
-  <button class="obtn obtn-cyan" onclick="startLevel(0)">↺ Play Again</button>
+  <button class="obtn obtn-cyan" onclick="setMode('story'); startLevel(0);">↺ Play Again</button>
 </div>
 
 <script>
+// ── Web Audio Synth System ──────────────────────────────────────────────────
+const AudioSys = {
+  ctx: null,
+  init() { 
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+    if(this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  play(type, volMod=1) {
+    if(!this.ctx) return;
+    const now = this.ctx.currentTime;
+    
+    if(type === 'click') {
+      const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(800, now);
+      g.gain.setValueAtTime(0.04, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.05);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(now); o.stop(now+0.05);
+    }
+    else if(type === 'place') {
+      const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+      o.type = 'square'; o.frequency.setValueAtTime(400, now);
+      g.gain.setValueAtTime(0.02, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.1);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(now); o.stop(now+0.1);
+    }
+    else if(type === 'erase') {
+      const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(200, now); o.frequency.exponentialRampToValueAtTime(50, now+0.1);
+      g.gain.setValueAtTime(0.03, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.1);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(now); o.stop(now+0.1);
+    }
+    else if(type === 'drop') {
+      const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(400, now); o.frequency.exponentialRampToValueAtTime(100, now+0.3);
+      g.gain.setValueAtTime(0.1, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.3);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(now); o.stop(now+0.3);
+    }
+    else if(type === 'bounce') {
+      const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(300 + Math.random()*100, now);
+      g.gain.setValueAtTime(0.15 * volMod, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.1);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(now); o.stop(now+0.1);
+    }
+    else if(type === 'win') {
+      [440, 554, 659, 880].forEach((f, i) => {
+        const o = this.ctx.createOscillator(); const g = this.ctx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, now + i*0.1);
+        g.gain.setValueAtTime(0, now);
+        g.gain.setValueAtTime(0.1, now + i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, now + i*0.1 + 0.3);
+        o.connect(g); g.connect(this.ctx.destination);
+        o.start(now + i*0.1); o.stop(now + i*0.1 + 0.3);
+      });
+    }
+  }
+};
+
+// Initialize audio on first user interaction
+document.addEventListener('pointerdown', () => AudioSys.init(), {once:true});
+
+// ── Particle System for Wins ──────────────────────────────────────────────────
+let particles = [];
+function spawnWinParticles(x, y) {
+  for(let i=0; i<80; i++) {
+    particles.push({
+      x: x, y: y,
+      vx: (Math.random()-0.5)*20,
+      vy: (Math.random()-0.5)*20 - 8,
+      size: Math.random()*5+3,
+      color: ['#00e5ff', '#ff3d71', '#ffe066', '#22c55e', '#ffffff'][Math.floor(Math.random()*5)],
+      life: 1.0,
+      decay: Math.random()*0.02 + 0.01,
+      rot: Math.random()*Math.PI*2,
+      rotSpeed: (Math.random()-0.5)*0.5
+    });
+  }
+}
+
+
 const {Engine,Bodies,Body,World,Events,Composite} = Matter;
 
-// Internal Simulation Size is locked. Scale translates pointer actions natively.
+// Internal Simulation Size is locked.
 const CS=540, COLS=9, ROWS=9, CELL=CS/COLS;
 
 // ── Level data ────────────────────────────────────────────────────────────────
 const LEVELS = [
-  {
-    id:0, name:"TUTORIAL", pill:null,
-    sub:"",
-    ballCol:4, holeCol:4, holeRow:8, holeMoving:false, bouncyBall:false,
-    hurdles:[], maxBlocks:3,
-    hint:"<strong>Tap</strong> or drag blocks from the toolbar to grid.\n<strong>Tap</strong> a placed block to rotate.\nUse the <strong>Eraser</strong> tool to remove.\n<strong>▶ Drop</strong> releases the ball."
-  },
-  {
-    id:1, name:"OFF-CENTER", pill:null,
-    sub:"",
-    ballCol:4, holeCol:0, holeRow:5, holeMoving:false, bouncyBall:false,
-    hurdles:[], maxBlocks:4,
-    hint:"The hole is on the <strong>left side</strong>.\n\nUse <strong>Ramp ←</strong> \nto bend the ball's trajectory.\nTap blocks to rotate them."
-  },
-  {
-    id:2, name:"HURDLES", pill:"NEW: Permanent Blocks",
-    sub:"",
-    ballCol:4, holeCol:8, holeRow:4, holeMoving:false, bouncyBall:false,
-    hurdles:[{col:3,row:3,type:0},
-              {col:4,row:3,type:0},
-              {col:5,row:3,type:0},
-              {col:4,row:5,type:0}],
-    maxBlocks:5,
-    hint:"<strong>🔒 Orange blocks</strong> are fixed.\nYou can't remove or rotate them.\n\nBuild a path around them\nto reach the right-side goal."
-  },
-  {
-    id:3, name:"MOVING TARGET", pill:"NEW: Moving Hole",
-    sub:"",
-    ballCol:4, holeCol:4, holeRow:7, holeMoving:true, holeSpeed:1.5, bouncyBall:false,
-    hurdles:[{col:2,row:3,type:0},
-            {col:6,row:5,type:0},
-            {col:3,row:6,type:0},
-            {col:4,row:6,type:0}],
-    maxBlocks:5,
-    hint:"The <strong>◀ ▶ red goal</strong> is moving!\n\nTime your drop carefully,\nor use blocks to guide the ball\ntoward the center path."
-  },
-  {
-    id:4, name:"HURDLES II", pill:"NEW: Block Limit",
-    sub:"",
-    ballCol:1, holeCol:8, holeRow:4, holeMoving:false, bouncyBall:true,
-    hurdles:[{col:3,row:5,type:0},
-            {col:4,row:3,type:0},
-            {col:5,row:3,type:0},
-            {col:4,row:5,type:0},
-            {col:6,row:4,type:0}],
-    maxBlocks:4,
-    hint: "<strong>Bouncy ball</strong> — high restitution!\n\nIt will ricochet off surfaces.\nRamps help absorb energy\nand redirect it."
-  },
-  {
-    id:5, name:"BOUNCY BALL", pill:"NEW: High Restitution Ball",
-    sub:"",
-    ballCol:4, holeCol:2, holeRow:7, holeMoving:false, bouncyBall:true,
-    hurdles:[{col:1,row:2,type:0},
-            {col:5,row:3,type:1},
-            {col:6,row:5,type:0},
-            {col:2,row:6,type:0},
-            {col:1,row:6,type:2},
-            {col:3,row:6,type:1},
-            {col:1,row:8,type:2},
-            {col:3,row:8,type:1}],
-    maxBlocks:6,
-    hint:"let's be creative"
-  }
+  { id:0, name:"TUTORIAL", ballCol:4, holeCol:4, holeRow:8, holeMoving:false, bouncyBall:false, hurdles:[], maxBlocks:3, hint:"<strong>Tap</strong> or drag blocks from the toolbar to grid.\n<strong>Tap</strong> a placed block to rotate.\nUse the <strong>Eraser</strong> tool to remove.\n<strong>▶ Drop</strong> releases the ball." },
+  { id:1, name:"OFF-CENTER", ballCol:4, holeCol:0, holeRow:5, holeMoving:false, bouncyBall:false, hurdles:[], maxBlocks:4, hint:"The hole is on the <strong>left side</strong>.\n\nUse <strong>Ramp ←</strong> \nto bend the ball's trajectory.\nTap blocks to rotate them." },
+  { id:2, name:"HURDLES", ballCol:4, holeCol:8, holeRow:4, holeMoving:false, bouncyBall:false, hurdles:[{col:3,row:3,type:0},{col:4,row:3,type:0},{col:5,row:3,type:0},{col:4,row:5,type:0}], maxBlocks:5, hint:"<strong>🔒 Orange blocks</strong> are fixed.\nYou can't remove or rotate them.\n\nBuild a path around them\nto reach the right-side goal." },
+  { id:3, name:"MOVING TARGET", ballCol:4, holeCol:4, holeRow:7, holeMoving:true, holeSpeed:1.5, bouncyBall:false, hurdles:[{col:2,row:3,type:0},{col:6,row:5,type:0},{col:3,row:6,type:0},{col:4,row:6,type:0}], maxBlocks:5, hint:"The <strong>◀ ▶ red goal</strong> is moving!\n\nTime your drop carefully,\nor use blocks to guide the ball\ntoward the center path." },
+  { id:4, name:"HURDLES II", ballCol:1, holeCol:8, holeRow:4, holeMoving:false, bouncyBall:true, hurdles:[{col:3,row:5,type:0},{col:4,row:3,type:0},{col:5,row:3,type:0},{col:4,row:5,type:0},{col:6,row:4,type:0}], maxBlocks:4, hint: "<strong>Bouncy ball</strong> — high restitution!\n\nIt will ricochet off surfaces.\nRamps help absorb energy\nand redirect it." },
+  { id:5, name:"BOUNCY BALL", ballCol:4, holeCol:2, holeRow:7, holeMoving:false, bouncyBall:true, hurdles:[{col:1,row:2,type:0},{col:5,row:3,type:1},{col:6,row:5,type:0},{col:2,row:6,type:0},{col:1,row:6,type:2},{col:3,row:6,type:1},{col:1,row:8,type:2},{col:3,row:8,type:1}], maxBlocks:6, hint:"let's be creative" }
 ];
+
+const diyLevel = {
+  id:'diy', name:"MY LEVEL", ballCol:4, holeCol:4, holeRow:8, holeMoving:false, bouncyBall:false, hurdles:[], maxBlocks:99, hint:""
+};
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let engine,world,ball,holeSensor;
 let holeVX=0, holeDir=1;
 let placedBlocks=[],hurdleBodies=[];
 let gameRunning=false,won=false;
-let currentLevel=0,maxUnlockedLevel=LEVELS.length-1,selectedType=0,blockCount=0;
+let currentLevel=0,maxUnlockedLevel=0;
+let gameMode = 'story'; // 'story', 'diy_build', 'diy_play'
+let selectedType=0,blockCount=0;
 let dragging=null,mouseX=0,mouseY=0,ghostVisible=false;
-let idleFrames=0;
-let lastBallPos={x:0, y:0};
+let idleFrames=0; let lastBallPos={x:0, y:0};
 
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-const ghostCanvas=document.getElementById('dragGhost');
-const ghostCtx=ghostCanvas.getContext('2d');
+const canvas=document.getElementById('gameCanvas'); const ctx=canvas.getContext('2d');
+const ghostCanvas=document.getElementById('dragGhost'); const ghostCtx=ghostCanvas.getContext('2d');
 
-// ── Coordinate Normalization for Responsiveness ──────────────────────────────
-// Translates pointer event coordinates (screen pixels) into logical canvas pixels (540x540)
 function getCanvasPos(e) {
   const rect = canvas.getBoundingClientRect();
-  const scaleX = CS / rect.width;
-  const scaleY = CS / rect.height;
-  return {
-    x: (e.clientX - rect.left) * scaleX,
-    y: (e.clientY - rect.top) * scaleY
-  };
+  return { x: (e.clientX - rect.left) * (CS / rect.width), y: (e.clientY - rect.top) * (CS / rect.height) };
 }
 
 // ── Block types ───────────────────────────────────────────────────────────────
@@ -343,20 +343,12 @@ const BTYPES=[
   {id:2,name:'Ramp ←',  color:'#7e22ce'}
 ];
 
-// Draw block visually
 function drawBV(c,type,size,color,alpha=1){
   c.save(); c.globalAlpha=alpha;
-  const m=2.5, s=size-m*2;
-  c.fillStyle=color;
-  c.beginPath();
-  if(type===0){
-    c.roundRect(m,m,s,s,3);
-  } else if(type===1){
-    c.moveTo(m,m); c.lineTo(size-m,size-m); c.lineTo(m,size-m); c.closePath();
-  } else if(type===2){
-    c.moveTo(size-m,m); c.lineTo(size-m,size-m); c.lineTo(m,size-m); c.closePath();
-  }
-  
+  const m=2.5, s=size-m*2; c.fillStyle=color; c.beginPath();
+  if(type===0){ c.roundRect(m,m,s,s,3); } 
+  else if(type===1){ c.moveTo(m,m); c.lineTo(size-m,size-m); c.lineTo(m,size-m); c.closePath(); } 
+  else if(type===2){ c.moveTo(size-m,m); c.lineTo(size-m,size-m); c.lineTo(m,size-m); c.closePath(); }
   if(type>=0 && type<=2){ c.fill(); }
   c.strokeStyle='rgba(255,255,255,0.12)'; c.lineWidth=1; c.stroke();
   c.restore();
@@ -364,132 +356,188 @@ function drawBV(c,type,size,color,alpha=1){
 
 function drawBlockAt(c,type,x,y,size,rot=0,alpha=1,hurdle=false){
   const color=hurdle?'#c2410c':BTYPES[type].color;
-  c.save();
-  c.translate(x+size/2,y+size/2);
-  c.rotate(rot);
-  c.translate(-size/2,-size/2);
-  drawBV(c,type,size,color,alpha);
-  c.restore();
+  c.save(); c.translate(x+size/2,y+size/2); c.rotate(rot); c.translate(-size/2,-size/2);
+  drawBV(c,type,size,color,alpha); c.restore();
+}
+
+function drawToolIcon(c, type, size, alpha=1) {
+  c.clearRect(0,0,size,size);
+  if(type >= 0 && type <= 2) { drawBV(c, type, size, '#c2410c', alpha); } // DIY Hurdle
+  else if (type === 3) { // Ball Tool
+      const br = size*0.35; c.fillStyle = diyLevel.bouncyBall ? '#ffe066' : '#00e5ff'; c.globalAlpha = alpha;
+      c.beginPath(); c.arc(size/2, size/2, br, 0, Math.PI*2); c.fill();
+  } else if (type === 4) { // Hole Tool
+      const hr = size*0.41; c.strokeStyle = '#ff3d71'; c.lineWidth = 2; c.globalAlpha = alpha;
+      c.beginPath(); c.arc(size/2, size/2, hr, 0, Math.PI*2); c.stroke();
+  }
 }
 
 // ── Physics bodies ────────────────────────────────────────────────────────────
 function makeBlockBody(type,col,row,rot=0){
-  const cx=col*CELL+CELL/2, cy=row*CELL+CELL/2;
-  const h=CELL/2; 
-  const o={isStatic:true,friction:0.4,restitution:0.25,label:'block',
-           collisionFilter:{category:0x0004,mask:0x0001}};
+  const cx=col*CELL+CELL/2, cy=row*CELL+CELL/2; const h=CELL/2; 
+  const o={isStatic:true,friction:0.4,restitution:0.25,label:'block', collisionFilter:{category:0x0004,mask:0x0001}};
   let body;
-  
-  if(type===0){
-    body=Bodies.rectangle(cx,cy,CELL,CELL,o);
-  } else if(type===1){
-    const v=[{x:-h,y:-h},{x:-h,y:h},{x:h,y:h}];
-    body=Bodies.fromVertices(cx,cy,[v],o,true);
-  } else if(type===2){
-    const v=[{x:h,y:-h},{x:-h,y:h},{x:h,y:h}];
-    body=Bodies.fromVertices(cx,cy,[v],o,true);
-  }
-  
+  if(type===0){ body=Bodies.rectangle(cx,cy,CELL,CELL,o); } 
+  else if(type===1){ body=Bodies.fromVertices(cx,cy,[[{x:-h,y:-h},{x:-h,y:h},{x:h,y:h}]],o,true); } 
+  else if(type===2){ body=Bodies.fromVertices(cx,cy,[[{x:h,y:-h},{x:-h,y:h},{x:h,y:h}]],o,true); }
   if(!body) return null;
-
-  Matter.Body.translate(body, {
-      x: (cx - h) - body.bounds.min.x,
-      y: (cy - h) - body.bounds.min.y
-  });
-  
-  if(rot!==0) {
-      Matter.Body.rotate(body, rot, {x: cx, y: cy});
-  }
-  
+  Matter.Body.translate(body, { x: (cx - h) - body.bounds.min.x, y: (cy - h) - body.bounds.min.y });
+  if(rot!==0) { Matter.Body.rotate(body, rot, {x: cx, y: cy}); }
   return body;
 }
 
-// ── Level setup ───────────────────────────────────────────────────────────────
 function createPhysics(){
-  engine=Engine.create({gravity:{x:0,y:0}});
-  world=engine.world;
-  const wo={isStatic:true,friction:0.3,restitution:0.2,label:'wall',
-            collisionFilter:{category:0x0004,mask:0x0001}};
+  engine=Engine.create({gravity:{x:0,y:0}}); world=engine.world;
+  const wo={isStatic:true,friction:0.3,restitution:0.2,label:'wall', collisionFilter:{category:0x0004,mask:0x0001}};
   World.add(world,[
-    Bodies.rectangle(CS/2,-10,CS+40,20,wo),     // Top Wall
-    Bodies.rectangle(-10,CS/2,20,CS+40,wo),     // Left Wall
-    Bodies.rectangle(CS+10,CS/2,20,CS+40,wo),   // Right Wall
-    Bodies.rectangle(CS/2,CS+10,CS+40,20,wo),   // Bottom Wall
+    Bodies.rectangle(CS/2,-50,CS+40,100,wo),     // Top (High roof)
+    Bodies.rectangle(-10,CS/2,20,CS+40,wo),     // Left
+    Bodies.rectangle(CS+10,CS/2,20,CS+40,wo),   // Right
+    Bodies.rectangle(CS/2,CS+10,CS+40,20,wo),   // Bottom
   ]);
   Events.on(engine,'collisionStart',e=>{
     e.pairs.forEach(p=>{
       const l=[p.bodyA.label,p.bodyB.label];
       if(l.includes('ball')&&l.includes('hole')) triggerWin();
+      else if(l.includes('ball') && gameRunning) {
+          const speed = ball.speed;
+          if(speed > 1.2) AudioSys.play('bounce', Math.min(speed/8, 1.0));
+      }
     });
   });
 }
 
-function startLevel(idx, keepBlocks = false){
-  const savedBlocks = keepBlocks ? placedBlocks.map(b => ({type: b.type, col: b.col, row: b.row, rotation: b.rotation})) : [];
-  currentLevel=idx;
-  const lvl=LEVELS[idx];
-  won=false; gameRunning=false; blockCount=0; idleFrames=0; lastBallPos={x:0, y:0};
+function setMode(mode) {
+  AudioSys.play('click');
+  gameMode = mode;
+  document.getElementById('tabStory').className = mode === 'story' ? 'tab active' : 'tab';
+  document.getElementById('tabDIY').className = mode.startsWith('diy') ? 'tab active' : 'tab';
   
-  if(engine){
-      Events.off(engine); // clear old events
-      World.clear(world);
-      Engine.clear(engine);
+  if (mode === 'story') {
+    document.getElementById('levelBadge').style.visibility = 'visible';
+    startLevel(maxUnlockedLevel);
+  } else if (mode === 'diy_build') {
+    document.getElementById('levelBadge').style.visibility = 'hidden';
+    startLevel('diy', false); // Start in build mode
+  } else if (mode === 'diy_play') {
+    document.getElementById('levelBadge').style.visibility = 'hidden';
+    startLevel('diy', false); // Start play mode
   }
-  placedBlocks=[]; hurdleBodies=[];
+}
 
+document.getElementById('tabStory').onclick = () => { if(gameMode!=='story') setMode('story'); };
+document.getElementById('tabDIY').onclick = () => { if(!gameMode.startsWith('diy')) setMode('diy_build'); };
+
+function startLevel(idx, keepBlocks = false){
+  particles = []; // Clear particles
+  const savedBlocks = keepBlocks ? placedBlocks.map(b => ({type: b.type, col: b.col, row: b.row, rotation: b.rotation})) : [];
+  currentLevel = idx;
+  const lvl = idx === 'diy' ? diyLevel : LEVELS[idx];
+  won = false; gameRunning = false; blockCount = 0; idleFrames = 0; lastBallPos = {x:0, y:0};
+  
+  if(engine){ Events.off(engine); World.clear(world); Engine.clear(engine); }
+  placedBlocks=[]; hurdleBodies=[];
   createPhysics();
 
-  // Ball
+  // Ball Setup
   const bx=lvl.ballCol*CELL+CELL/2, by=CELL*0.5;
   ball=Bodies.circle(bx,by,CELL*0.35,{
-    restitution:lvl.bouncyBall?0.85:0.35,
-    friction:lvl.bouncyBall?0.05:0.3,
-    frictionAir:lvl.bouncyBall?0.005:0.012,
-    density:lvl.bouncyBall?0.0004:0.001,
-    isStatic:true,label:'ball',
-    collisionFilter:{category:0x0001,mask:0x0002|0x0004}
+    restitution:lvl.bouncyBall?0.85:0.35, friction:lvl.bouncyBall?0.05:0.3,
+    frictionAir:lvl.bouncyBall?0.005:0.012, density:lvl.bouncyBall?0.0004:0.001,
+    isStatic:true, label:'ball', collisionFilter:{category:0x0001,mask:0x0002|0x0004}
   });
   World.add(world,ball);
 
-  // Hole
+  // Hole Setup
   const hrw = lvl.holeRow !== undefined ? lvl.holeRow : ROWS-1;
   const hx=lvl.holeCol*CELL+CELL/2, hy=hrw*CELL+CELL/2;
   holeVX=hx; holeDir=1;
   holeSensor=Bodies.circle(hx,hy,CELL*0.44,{
-    isStatic:true,isSensor:true,label:'hole',
-    collisionFilter:{category:0x0002,mask:0x0001}
+    isStatic:true, isSensor:true, label:'hole', collisionFilter:{category:0x0002,mask:0x0001}
   });
   World.add(world,holeSensor);
 
-  // Hurdles
+  // Hurdles Setup
   lvl.hurdles.forEach(h=>{
-    const b=makeBlockBody(h.type,h.col,h.row,0);
-    if(b){b.label='hurdle';World.add(world,b);hurdleBodies.push({body:b,...h,rotation:0});}
+    const b=makeBlockBody(h.type,h.col,h.row,h.rotation||0);
+    if(b){ b.label='hurdle'; World.add(world,b); hurdleBodies.push({body:b,...h}); }
   });
 
-  // Restore User Blocks (if keepBlocks is true)
-  savedBlocks.forEach(sb => {
-    const body = makeBlockBody(sb.type, sb.col, sb.row, sb.rotation);
-    if (body) {
-      World.add(world, body);
-      placedBlocks.push({body, type: sb.type, col: sb.col, row: sb.row, rotation: sb.rotation});
-      blockCount++;
-    }
-  });
+  // Restore User Blocks
+  if(gameMode !== 'diy_build') {
+    savedBlocks.forEach(sb => {
+      const body = makeBlockBody(sb.type, sb.col, sb.row, sb.rotation);
+      if (body) {
+        World.add(world, body);
+        placedBlocks.push({body, type: sb.type, col: sb.col, row: sb.row, rotation: sb.rotation});
+        blockCount++;
+      }
+    });
+  }
 
-  // UI
-  if(selectedType === -1) selectedType = 0; 
-  updatePips();buildToolbar();updateHint();updateBallUI();
-  document.getElementById('nextBtn').style.display='none';
-  document.getElementById('dropBtn').disabled=false;
+  // UI Updates
+  if(selectedType === -1) selectedType = 0;
+  if(gameMode === 'story') updatePips();
+  
+  buildToolbar(); updateHint(); updateBallUI(); updateControlButtons();
   document.getElementById('winOv').classList.remove('show');
   document.getElementById('doneOv').classList.remove('show');
 }
 
-function retryLevel(){startLevel(currentLevel, true);}
+function updateControlButtons() {
+    const dropBtn = document.getElementById('dropBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if(gameMode === 'diy_build') {
+        dropBtn.textContent = "▶ TEST LEVEL";
+        dropBtn.className = "btn btn-drop";
+        dropBtn.disabled = false;
+        dropBtn.onclick = () => { AudioSys.play('click'); setMode('diy_play'); };
+
+        resetBtn.style.display = 'none';
+
+        clearBtn.textContent = "⨯ CLEAR LEVEL";
+        clearBtn.onclick = () => { AudioSys.play('erase'); diyLevel.hurdles = []; startLevel('diy', false); };
+
+        nextBtn.style.display = 'none';
+        document.getElementById('blocksTitle').textContent = "DESIGN TOOLS";
+        document.getElementById('controlsTitle').textContent = "LEVEL OPTIONS";
+    } else {
+        dropBtn.textContent = "▶ DROP";
+        dropBtn.className = "btn btn-drop";
+        dropBtn.disabled = false;
+        dropBtn.onclick = () => {
+            if(gameRunning||won)return; AudioSys.play('drop');
+            gameRunning=true; engine.gravity.y=1.2; Body.setStatic(ball,false);
+        };
+
+        resetBtn.style.display = 'block';
+        resetBtn.textContent = "↺ RETRY";
+        resetBtn.onclick = () => { AudioSys.play('click'); startLevel(currentLevel, true); };
+
+        clearBtn.textContent = "⨯ CLEAR BLOCKS";
+        clearBtn.onclick = () => { AudioSys.play('erase'); startLevel(currentLevel, false); };
+
+        nextBtn.style.display = (gameMode === 'diy_play') ? 'block' : 'none';
+        if (gameMode === 'diy_play') {
+            nextBtn.textContent = "✎ EDIT LEVEL";
+            nextBtn.className = "btn btn-reset"; 
+            nextBtn.onclick = () => { AudioSys.play('click'); setMode('diy_build'); };
+        }
+        document.getElementById('blocksTitle').textContent = "BLOCKS";
+        document.getElementById('controlsTitle').textContent = "CONTROLS";
+    }
+}
+
+function retryLevel(){ AudioSys.play('click'); startLevel(currentLevel, true);}
 function advanceLevel(){
-  const next=currentLevel+1;
+  AudioSys.play('click');
   document.getElementById('winOv').classList.remove('show');
+  if(gameMode === 'diy_play') { setMode('diy_build'); return; }
+  
+  const next=currentLevel+1;
   if(next>=LEVELS.length) document.getElementById('doneOv').classList.add('show');
   else startLevel(next);
 }
@@ -498,9 +546,7 @@ function initPips() {
   const badge = document.getElementById('levelBadge');
   badge.innerHTML = '<span class="level-lbl">Level</span>';
   for(let i = 0; i < LEVELS.length; i++) {
-    const pip = document.createElement('div');
-    pip.id = 'pip' + i;
-    pip.className = 'level-pip';
+    const pip = document.createElement('div'); pip.id = 'pip' + i; pip.className = 'level-pip';
     badge.appendChild(pip);
   }
 }
@@ -515,65 +561,88 @@ function updatePips(){
 
     if(i <= maxUnlockedLevel) {
       p.classList.add('unlocked');
-      p.onclick = () => { if(!gameRunning) { startLevel(i); } };
+      p.onclick = () => { if(!gameRunning) { AudioSys.play('click'); startLevel(i); } };
       p.title = `Play Level ${i+1}`;
-    } else {
-      p.onclick = null;
-      p.title = `Locked`;
-    }
+    } else { p.onclick = null; p.title = `Locked`; }
   }
 }
 
 function updateHint(){
-  const lvl=LEVELS[currentLevel];
-  document.getElementById('hintTitle').textContent=`Level ${currentLevel+1} — ${lvl.name}`;
-  document.getElementById('hintBody').innerHTML=lvl.hint.replace(/\n/g,'<br>');
+  if(gameMode === 'diy_build') {
+      document.getElementById('hintTitle').textContent = "D.I.Y. EDITOR";
+      document.getElementById('hintBody').innerHTML = "Select tools to place the <strong>Ball</strong>, <strong>Hole</strong>, and fixed <strong>Hurdles</strong>.<br><br>Tap hurdles to rotate.<br>Ball must be on top row.";
+  } else if (gameMode === 'diy_play') {
+      document.getElementById('hintTitle').textContent = "YOUR LEVEL";
+      document.getElementById('hintBody').innerHTML = "Test your creation!<br>Use standard blocks to guide the ball to the hole.";
+  } else {
+      const lvl=LEVELS[currentLevel];
+      document.getElementById('hintTitle').textContent=`Level ${currentLevel+1} — ${lvl.name}`;
+      document.getElementById('hintBody').innerHTML=lvl.hint.replace(/\n/g,'<br>');
+  }
 }
 
 function updateBallUI(){
-  const lvl=LEVELS[currentLevel];
+  const lvl = gameMode.startsWith('diy') ? diyLevel : LEVELS[currentLevel];
+  const bUI = document.getElementById('ballToggleRow');
+  
+  if(gameMode === 'diy_build') {
+      bUI.style.cursor = 'pointer';
+      bUI.onclick = () => { AudioSys.play('place'); diyLevel.bouncyBall = !diyLevel.bouncyBall; startLevel('diy'); };
+      bUI.title = "Click to toggle Bouncy Ball";
+  } else {
+      bUI.style.cursor = 'default';
+      bUI.onclick = null;
+      bUI.title = "";
+  }
+  
   document.getElementById('ballDot').className='ball-dot'+(lvl.bouncyBall?' bouncy':'');
-  document.getElementById('ballType').textContent=lvl.bouncyBall?'Bouncy':'Standard';
+  document.getElementById('ballType').textContent=lvl.bouncyBall?'Bouncy (Tap to Toggle)':'Standard (Tap to Toggle)';
+  if(gameMode !== 'diy_build') document.getElementById('ballType').textContent=lvl.bouncyBall?'Bouncy Ball':'Standard Ball';
 }
 
 // ── Toolbar ───────────────────────────────────────────────────────────────────
 function buildToolbar(){
-  const lvl=LEVELS[currentLevel];
-  const tb=document.getElementById('toolbar');tb.innerHTML='';
+  const lvl = gameMode.startsWith('diy') ? diyLevel : LEVELS[currentLevel];
+  const tb = document.getElementById('toolbar'); tb.innerHTML='';
   
-  BTYPES.forEach((bt,i)=>{
-    const avail=lvl.availableBlocks===undefined||lvl.availableBlocks.includes(i);
+  let tools = [];
+  if(gameMode === 'diy_build') {
+      tools = [
+          {id:3, name:'Set Ball'}, {id:4, name:'Set Hole'},
+          {id:0, name:'Fix Solid', isH: true}, {id:1, name:'Fix Rmp →', isH: true}, {id:2, name:'Fix Rmp ←', isH: true}
+      ];
+  } else {
+      tools = BTYPES.map(b => ({id: b.id, name: b.name}));
+  }
+  
+  tools.forEach(t => {
+    const i = t.id;
     const btn=document.createElement('div');
-    btn.className='block-btn'+(i===selectedType?' selected':'')+(!avail?' disabled':'');
+    btn.className='block-btn'+(i===selectedType?' selected':'');
     
-    const mc=document.createElement('canvas');mc.width=30;mc.height=30;
-    drawBV(mc.getContext('2d'),i,30,bt.color);
+    const mc=document.createElement('canvas'); mc.width=30; mc.height=30;
+    if(gameMode === 'diy_build') drawToolIcon(mc.getContext('2d'), i, 30);
+    else drawBV(mc.getContext('2d'), i, 30, BTYPES[i].color);
     
-    const lbl=document.createElement('span');lbl.className='block-label';lbl.textContent=bt.name;
-    btn.appendChild(mc);btn.appendChild(lbl);
+    const lbl=document.createElement('span'); lbl.className='block-label'; lbl.textContent=t.name;
+    btn.appendChild(mc); btn.appendChild(lbl);
     
-    if(avail){
-      // Support Touch Tap to select & Mouse pointer down to start drag
-      btn.addEventListener('pointerdown', e => { 
-        if(gameRunning) return; 
-        selectedType=i; 
-        buildToolbar(); // Update visuals immediately
-        startDrag(e,i); 
-      });
-    }
+    btn.addEventListener('pointerdown', e => { 
+      if(gameRunning) return; 
+      AudioSys.play('click'); selectedType=i; buildToolbar(); startDrag(e,i); 
+    });
     tb.appendChild(btn);
   });
   
   const eBtn=document.createElement('div');
   eBtn.className='block-btn'+(-1===selectedType?' eraser-selected':'');
-  const ec=document.createElement('canvas');ec.width=30;ec.height=30;
-  const ectx=ec.getContext('2d');
+  const ec=document.createElement('canvas');ec.width=30;ec.height=30; const ectx=ec.getContext('2d');
   ectx.fillStyle='rgba(255,61,113,0.15)'; ectx.fillRect(2,2,26,26);
-  ectx.strokeStyle='#ff3d71'; ectx.lineWidth=2; ectx.lineCap='round';
-  ectx.beginPath(); ectx.moveTo(8,8); ectx.lineTo(22,22); ectx.moveTo(22,8); ectx.lineTo(8,22); ectx.stroke();
+  ectx.strokeStyle='#ff3d71'; ectx.lineWidth=2; ectx.lineCap='round'; ectx.beginPath(); 
+  ectx.moveTo(8,8); ectx.lineTo(22,22); ectx.moveTo(22,8); ectx.lineTo(8,22); ectx.stroke();
   const elbl=document.createElement('span');elbl.className='block-label';elbl.textContent='Eraser';
   eBtn.appendChild(ec);eBtn.appendChild(elbl);
-  eBtn.addEventListener('pointerdown',()=>{selectedType=-1;buildToolbar();});
+  eBtn.addEventListener('pointerdown',()=>{ AudioSys.play('click'); selectedType=-1; buildToolbar(); });
   tb.appendChild(eBtn);
 }
 
@@ -581,141 +650,137 @@ function buildToolbar(){
 function startDrag(e,type){
   if(type === -1) return;
   dragging={type};
-  const g=document.getElementById('dragGhost');
-  g.style.display='block'; ghostVisible=true;
+  const g=document.getElementById('dragGhost'); g.style.display='block'; ghostVisible=true;
   ghostCtx.clearRect(0,0,60,60);
-  drawBV(ghostCtx,type,60,BTYPES[type].color,0.85);
+  if(gameMode === 'diy_build') drawToolIcon(ghostCtx, type, 60, 0.85);
+  else drawBV(ghostCtx,type,60,BTYPES[type].color,0.85);
   moveGhost(e.clientX,e.clientY);
 }
 
 function moveGhost(cx,cy){
   const g=document.getElementById('dragGhost');
-  const rect = canvas.getBoundingClientRect();
-  const scale = rect.width / CS; // Scale ghost to match responsive canvas visually
+  const rect = canvas.getBoundingClientRect(); const scale = rect.width / CS;
   g.style.transform = `translate(-50%, -50%) scale(${scale})`;
-  g.style.left = cx + 'px';
-  g.style.top = cy + 'px';
+  g.style.left = cx + 'px'; g.style.top = cy + 'px';
 }
 
-document.addEventListener('pointermove', e => {
-  mouseX=e.clientX; mouseY=e.clientY;
-  if(dragging) moveGhost(e.clientX,e.clientY);
-});
-
+document.addEventListener('pointermove', e => { mouseX=e.clientX; mouseY=e.clientY; if(dragging) moveGhost(e.clientX,e.clientY); });
 document.addEventListener('pointerup', e => {
   if(!dragging) return;
   document.getElementById('dragGhost').style.display='none'; ghostVisible=false;
-  
-  // Calculate scaled target drop
   const pos = getCanvasPos(e);
-  if(pos.x >= 0 && pos.x < CS && pos.y >= 0 && pos.y < CS) {
-    doPlace(dragging.type, pos.x, pos.y);
-  }
+  if(pos.x >= 0 && pos.x < CS && pos.y >= 0 && pos.y < CS) { doPlaceOrAction(dragging.type, pos.x, pos.y); }
   dragging=null;
 });
 
-function doPlace(type,x,y){
-  if(gameRunning)return;
-  const lvl=LEVELS[currentLevel];
-  const col=Math.floor(x/CELL),row=Math.floor(y/CELL);
-  const hrw = lvl.holeRow !== undefined ? lvl.holeRow : ROWS-1;
+canvas.addEventListener('pointerdown', e => {
+  if(gameRunning || dragging) return; 
+  const pos = getCanvasPos(e);
+  doPlaceOrAction(selectedType, pos.x, pos.y);
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+function doPlaceOrAction(type, x, y) {
+  const col = Math.floor(x/CELL), row = Math.floor(y/CELL);
+  if(col<0||col>=COLS||row<0||row>=ROWS) return;
   
-  if(col<0||col>=COLS||row<0||row>=ROWS)return;
-  if(col===lvl.ballCol && row===0) return;
-  if(!lvl.holeMoving && col===lvl.holeCol && row===hrw) return;
-  if(lvl.holeMoving && row===hrw) return;
-  if(hurdleBodies.find(h=>h.col===col&&h.row===row))return;
-  
-  const existing=placedBlocks.findIndex(b=>b.col===col&&b.row===row);
-  const replacing=existing>=0;
-  
-  if(!replacing&&blockCount>=lvl.maxBlocks)return;
-  if(replacing){
-      World.remove(world,placedBlocks[existing].body);
-      placedBlocks.splice(existing,1);
-      blockCount--;
+  if (gameMode === 'diy_build') {
+     handleDIYBuildClick(type, col, row);
+  } else {
+     handlePlayClick(type, col, row);
   }
-  
-  const body=makeBlockBody(type,col,row,0);
-  if(!body)return;
-  
-  World.add(world,body);
-  placedBlocks.push({body,type,col,row,rotation:0});
-  blockCount++;
 }
 
-// Universal unified Interaction on Canvas (handles Mouse click & Touch tap)
-canvas.addEventListener('pointerdown', e => {
-  // If the user was dragging and dropped, this skips handling it twice
-  if(gameRunning || dragging) return; 
-  
-  const pos = getCanvasPos(e);
-  const col = Math.floor(pos.x / CELL);
-  const row = Math.floor(pos.y / CELL);
+function handleDIYBuildClick(type, col, row) {
+  if (type === -1) { // Eraser
+     const idx = diyLevel.hurdles.findIndex(h => h.col===col && h.row===row);
+     if(idx >= 0) { AudioSys.play('erase'); diyLevel.hurdles.splice(idx, 1); startLevel('diy'); }
+  } else if (type === 3) { // Ball
+     if(row === 0) { AudioSys.play('place'); diyLevel.ballCol = col; startLevel('diy'); }
+  } else if (type === 4) { // Hole
+     AudioSys.play('place'); diyLevel.holeCol = col; diyLevel.holeRow = row; startLevel('diy');
+  } else if (type >= 0 && type <= 2) { // Hurdle
+     if(col === diyLevel.ballCol && row === 0) return;
+     if(col === diyLevel.holeCol && row === diyLevel.holeRow) return;
+     const idx = diyLevel.hurdles.findIndex(h => h.col===col && h.row===row);
+     if(idx >= 0) {
+         diyLevel.hurdles[idx].rotation = (diyLevel.hurdles[idx].rotation + Math.PI/2) % (Math.PI*2);
+     } else {
+         diyLevel.hurdles.push({type: type, col: col, row: row, rotation: 0});
+     }
+     AudioSys.play('place'); startLevel('diy');
+  }
+}
+
+function handlePlayClick(type, col, row) {
+  const lvl = gameMode === 'diy_play' ? diyLevel : LEVELS[currentLevel];
+  const hrw = lvl.holeRow !== undefined ? lvl.holeRow : ROWS-1;
   const idx = placedBlocks.findIndex(b => b.col === col && b.row === row);
-  
-  // ERASER LOGIC
-  if(selectedType === -1) {
+
+  if(type === -1) { // Eraser
       if(idx >= 0) {
-          World.remove(world, placedBlocks[idx].body);
-          placedBlocks.splice(idx, 1);
-          blockCount--;
+          AudioSys.play('erase'); World.remove(world, placedBlocks[idx].body);
+          placedBlocks.splice(idx, 1); blockCount--;
       }
       return;
   }
-
-  // PLACEMENT AND ROTATION LOGIC
-  if(idx >= 0) {
-      // Rotate if block already exists here
+  
+  if(idx >= 0) { // Rotate existing
       const bd = placedBlocks[idx];
       bd.rotation = (bd.rotation + Math.PI / 2) % (Math.PI * 2);
       World.remove(world, bd.body);
       const nb = makeBlockBody(bd.type, bd.col, bd.row, bd.rotation);
-      if(nb) {
-          bd.body = nb;
-          World.add(world, nb);
-      }
-  } else {
-      // Place block via tap on empty space
-      doPlace(selectedType, pos.x, pos.y);
+      if(nb) { bd.body = nb; World.add(world, nb); AudioSys.play('place'); }
+  } else { // Place new
+      if(col===lvl.ballCol && row===0) return;
+      if(!lvl.holeMoving && col===lvl.holeCol && row===hrw) return;
+      if(lvl.holeMoving && row===hrw) return;
+      if(hurdleBodies.find(h=>h.col===col&&h.row===row)) return;
+      if(blockCount>=lvl.maxBlocks) return;
+      
+      const body=makeBlockBody(type,col,row,0);
+      if(!body) return;
+      AudioSys.play('place');
+      World.add(world,body);
+      placedBlocks.push({body,type,col,row,rotation:0});
+      blockCount++;
   }
-});
-
-// Disable right click menu natively inside game canvas
-canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-// ── Controls ──────────────────────────────────────────────────────────────────
-document.getElementById('dropBtn').addEventListener('click',()=>{
-  if(gameRunning||won)return;
-  gameRunning=true;engine.gravity.y=1.2;Body.setStatic(ball,false);
-});
-
-document.getElementById('resetBtn').addEventListener('click',()=>{startLevel(currentLevel, true);});
-document.getElementById('clearBtn').addEventListener('click',()=>{startLevel(currentLevel, false);});
-document.getElementById('nextBtn').addEventListener('click',advanceLevel);
+}
 
 function triggerWin(){
   if(won)return;won=true;gameRunning=false;
+  AudioSys.play('win');
+  spawnWinParticles(holeSensor.position.x, holeSensor.position.y);
   Body.setStatic(ball,true);Body.setVelocity(ball,{x:0,y:0});
   
-  maxUnlockedLevel = Math.max(maxUnlockedLevel, currentLevel + 1);
-  updatePips(); 
+  if(gameMode === 'story') {
+    maxUnlockedLevel = Math.max(maxUnlockedLevel, currentLevel + 1);
+    updatePips(); 
+  }
   
   setTimeout(()=>{
-    document.getElementById('winNum').textContent=`LEVEL ${currentLevel+1} COMPLETE`;
-    const subs=["Straight down — nice!","Redirected perfectly!","Navigated the hurdles!","Block limit mastered!","Timed the moving target!","Tamed the bouncy beast!"];
-    document.getElementById('winSub').textContent=subs[currentLevel]||'';
-    document.getElementById('winNextBtn').textContent=currentLevel>=LEVELS.length-1?'★ Finish':'Next Level →';
+    if(gameMode === 'diy_play') {
+        document.getElementById('winNum').textContent = "D.I.Y. COMPLETE";
+        document.getElementById('winSub').textContent = "Your level is perfectly playable!";
+        document.getElementById('winRetryBtn').style.display = 'block';
+        document.getElementById('winNextBtn').textContent = "✎ Edit Level";
+        document.getElementById('winNextBtn').onclick = () => { AudioSys.play('click'); setMode('diy_build'); };
+    } else {
+        document.getElementById('winNum').textContent=`LEVEL ${currentLevel+1} COMPLETE`;
+        const subs=["Straight down — nice!","Redirected perfectly!","Navigated the hurdles!","Block limit mastered!","Timed the moving target!","Tamed the bouncy beast!"];
+        document.getElementById('winSub').textContent=subs[currentLevel]||'';
+        document.getElementById('winRetryBtn').style.display = 'block';
+        document.getElementById('winNextBtn').textContent=currentLevel>=LEVELS.length-1?'★ Finish':'Next Level →';
+        document.getElementById('winNextBtn').onclick = advanceLevel;
+    }
     document.getElementById('winOv').classList.add('show');
-  },500);
+  }, 1000); // Wait a sec for particles
 }
 
-// ── Moving hole ───────────────────────────────────────────────────────────────
 function tickHole(){
-  const lvl=LEVELS[currentLevel];
+  const lvl = gameMode.startsWith('diy') ? diyLevel : LEVELS[currentLevel];
   if(!lvl.holeMoving||won)return;
-  const spd=lvl.holeSpeed||1.4;
-  holeVX+=holeDir*spd;
+  const spd=lvl.holeSpeed||1.4; holeVX+=holeDir*spd;
   if(holeVX>CS-CELL*0.5){holeVX=CS-CELL*0.5;holeDir=-1;}
   if(holeVX<CELL*0.5){holeVX=CELL*0.5;holeDir=1;}
   Body.setPosition(holeSensor,{x:holeVX,y:holeSensor.position.y});
@@ -727,21 +792,14 @@ function render(){
   tickHole();
 
   if(gameRunning && !won) {
-    const dx = ball.position.x - lastBallPos.x;
-    const dy = ball.position.y - lastBallPos.y;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    
-    if(dist < 0.2) {
-      idleFrames++;
-      if(idleFrames > 90) { retryLevel(); }
-    } else {
-      idleFrames = 0; 
-    }
+    const dx = ball.position.x - lastBallPos.x; const dy = ball.position.y - lastBallPos.y;
+    if(Math.sqrt(dx*dx + dy*dy) < 0.2) {
+      idleFrames++; if(idleFrames > 90) { AudioSys.play('erase'); startLevel(currentLevel, true); }
+    } else { idleFrames = 0; }
     lastBallPos = {x: ball.position.x, y: ball.position.y};
     
-    // Out of bounds check
     if(ball.position.y < -50 || ball.position.x < -50 || ball.position.x > CS + 50) {
-      retryLevel();
+      AudioSys.play('erase'); startLevel(currentLevel, true);
     }
   }
 
@@ -753,28 +811,32 @@ function render(){
   for(let c=0;c<=COLS;c++){ctx.beginPath();ctx.moveTo(c*CELL,0);ctx.lineTo(c*CELL,CS);ctx.stroke();}
   for(let r=0;r<=ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*CELL);ctx.lineTo(CS,r*CELL);ctx.stroke();}
 
-  const lvl=LEVELS[currentLevel];
+  const lvl = gameMode.startsWith('diy') ? diyLevel : LEVELS[currentLevel];
   const hrw = lvl.holeRow !== undefined ? lvl.holeRow : ROWS-1;
 
-  // Reserved row tints
-  ctx.fillStyle='rgba(0,229,255,0.025)';ctx.fillRect(0,0,CS,CELL);
-  ctx.fillStyle='rgba(255,61,113,0.025)';
-  if (lvl.holeMoving) {
-    ctx.fillRect(0,hrw*CELL,CS,CELL);
+  // DIY Zones / Reserved Tints
+  if(gameMode === 'diy_build') {
+      ctx.fillStyle='rgba(0,229,255,0.05)';ctx.fillRect(0,0,CS,CELL); // Top row allowed
+      ctx.fillStyle='rgba(255,255,255,0.03)';ctx.fillRect(0,CELL,CS,CS-CELL);
   } else {
-    ctx.fillRect(lvl.holeCol*CELL,hrw*CELL,CELL,CELL);
+      ctx.fillStyle='rgba(0,229,255,0.025)';ctx.fillRect(0,0,CS,CELL);
+      ctx.fillStyle='rgba(255,61,113,0.025)';
+      if (lvl.holeMoving) { ctx.fillRect(0,hrw*CELL,CS,CELL); } 
+      else { ctx.fillRect(lvl.holeCol*CELL,hrw*CELL,CELL,CELL); }
   }
 
   // Block counter
-  const rem=lvl.maxBlocks-blockCount;
-  ctx.fillStyle=rem>0?'rgba(0,229,255,0.5)':'rgba(255,61,113,0.6)';
-  ctx.font='700 8px Space Mono';ctx.textAlign='left';
-  ctx.fillText(`BLOCKS ${blockCount}/${lvl.maxBlocks}`,5,CS-5);
+  if(gameMode !== 'diy_build') {
+      const rem=lvl.maxBlocks-blockCount;
+      ctx.fillStyle=rem>0?'rgba(0,229,255,0.5)':'rgba(255,61,113,0.6)';
+      ctx.font='700 8px Space Mono';ctx.textAlign='left';
+      if(lvl.maxBlocks < 99) ctx.fillText(`BLOCKS ${blockCount}/${lvl.maxBlocks}`,5,CS-5);
+  }
 
   // Hurdles
   hurdleBodies.forEach(h=>{
     drawBlockAt(ctx,h.type,h.col*CELL,h.row*CELL,CELL,h.rotation,1,true);
-    ctx.font='11px sans-serif';ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='11px sans-serif';ctx.textAlign='center';
     ctx.fillText('🔒',h.col*CELL+CELL/2,h.row*CELL+CELL/2+4);
   });
 
@@ -785,65 +847,92 @@ function render(){
     ctx.strokeRect(bd.col*CELL+1,bd.row*CELL+1,CELL-2,CELL-2);
   });
 
-  // Eraser / Tap placement hover preview
+  // Hover Previews
   if(!gameRunning && mouseX > 0 && mouseY > 0) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = CS / rect.width;
-    const scaleY = CS / rect.height;
-    const mx = (mouseX - rect.left) * scaleX;
-    const my = (mouseY - rect.top) * scaleY;
+    const mx = (mouseX - rect.left) * (CS / rect.width); const my = (mouseY - rect.top) * (CS / rect.height);
     
     if(mx >= 0 && mx < CS && my >= 0 && my < CS) {
         const pc = Math.floor(mx/CELL), pr = Math.floor(my/CELL);
         const bd = placedBlocks.find(b => b.col === pc && b.row === pr);
+        const hr = hurdleBodies.find(h => h.col === pc && h.row === pr);
         
-        if(selectedType === -1 && bd) {
-            ctx.fillStyle = 'rgba(255,61,113,0.35)';
-            ctx.fillRect(pc*CELL, pr*CELL, CELL, CELL);
-            ctx.strokeStyle = '#ff3d71'; ctx.lineWidth = 2;
-            ctx.strokeRect(pc*CELL+2, pr*CELL+2, CELL-4, CELL-4);
-        }
-        else if (selectedType !== -1 && !dragging) {
-            const ok = pr>=0 && pr<ROWS &&
-                       !(pc===lvl.ballCol && pr===0) &&
-                       !(lvl.holeMoving ? pr===hrw : (pc===lvl.holeCol && pr===hrw)) &&
-                       !hurdleBodies.find(h=>h.col===pc&&h.row===pr);
-            const canPlace = ok && (blockCount<lvl.maxBlocks || bd);
-            if(ok) {
-              ctx.strokeStyle=canPlace?'rgba(0,229,255,0.4)':'rgba(255,61,113,0.4)';
-              ctx.lineWidth=2;ctx.strokeRect(pc*CELL+2,pr*CELL+2,CELL-4,CELL-4);
-              if(!bd && canPlace) drawBlockAt(ctx,selectedType,pc*CELL,pr*CELL,CELL,0,0.15);
+        if (gameMode === 'diy_build') {
+            if(selectedType === -1 && hr) { // Erasing hurdle
+                ctx.fillStyle = 'rgba(255,61,113,0.35)'; ctx.fillRect(pc*CELL, pr*CELL, CELL, CELL);
+                ctx.strokeStyle = '#ff3d71'; ctx.lineWidth = 2; ctx.strokeRect(pc*CELL+2, pr*CELL+2, CELL-4, CELL-4);
+            } else if (selectedType !== -1 && !dragging) {
+                let ok = true;
+                if(selectedType === 3 && pr !== 0) ok = false; // ball only top
+                if(selectedType >= 0 && selectedType <= 2 && ((pc===lvl.ballCol && pr===0) || (pc===lvl.holeCol && pr===lvl.holeRow))) ok = false;
+                ctx.strokeStyle=ok?'rgba(255,255,255,0.3)':'rgba(255,61,113,0.4)';
+                ctx.lineWidth=2;ctx.strokeRect(pc*CELL+2,pr*CELL+2,CELL-4,CELL-4);
+                if(ok) drawToolIcon(ctx, selectedType, CELL, 0.3);
+                ctx.translate(pc*CELL, pr*CELL); drawToolIcon(ctx, selectedType, CELL, 0.3); ctx.translate(-pc*CELL, -pr*CELL);
+            }
+        } else {
+            // Story / Play Mode Hover
+            if(selectedType === -1 && bd) {
+                ctx.fillStyle = 'rgba(255,61,113,0.35)'; ctx.fillRect(pc*CELL, pr*CELL, CELL, CELL);
+                ctx.strokeStyle = '#ff3d71'; ctx.lineWidth = 2; ctx.strokeRect(pc*CELL+2, pr*CELL+2, CELL-4, CELL-4);
+            } else if (selectedType !== -1 && !dragging) {
+                const ok = pr>=0 && pr<ROWS && !(pc===lvl.ballCol && pr===0) &&
+                           !(lvl.holeMoving ? pr===hrw : (pc===lvl.holeCol && pr===hrw)) && !hr;
+                const canPlace = ok && (blockCount<lvl.maxBlocks || bd);
+                if(ok) {
+                  ctx.strokeStyle=canPlace?'rgba(0,229,255,0.4)':'rgba(255,61,113,0.4)';
+                  ctx.lineWidth=2;ctx.strokeRect(pc*CELL+2,pr*CELL+2,CELL-4,CELL-4);
+                  if(!bd && canPlace) drawBlockAt(ctx,selectedType,pc*CELL,pr*CELL,CELL,0,0.15);
+                }
             }
         }
     }
   }
 
   // Hole
-  const hx=holeSensor.position.x, hy=holeSensor.position.y, hr=CELL*0.41;
-  const hg=ctx.createRadialGradient(hx,hy,0,hx,hy,hr*2.4);
+  const hx=holeSensor.position.x, hy=holeSensor.position.y, hrC=CELL*0.41;
+  const hg=ctx.createRadialGradient(hx,hy,0,hx,hy,hrC*2.4);
   hg.addColorStop(0,'rgba(255,61,113,0.4)');hg.addColorStop(1,'transparent');
-  ctx.fillStyle=hg;ctx.beginPath();ctx.arc(hx,hy,hr*2.4,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#ff3d71';ctx.lineWidth=2;ctx.beginPath();ctx.arc(hx,hy,hr,0,Math.PI*2);ctx.stroke();
-  ctx.fillStyle='rgba(255,61,113,0.18)';ctx.beginPath();ctx.arc(hx,hy,hr,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#ff3d71';ctx.beginPath();ctx.arc(hx,hy,hr*0.32,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=hg;ctx.beginPath();ctx.arc(hx,hy,hrC*2.4,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#ff3d71';ctx.lineWidth=2;ctx.beginPath();ctx.arc(hx,hy,hrC,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='rgba(255,61,113,0.18)';ctx.beginPath();ctx.arc(hx,hy,hrC,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff3d71';ctx.beginPath();ctx.arc(hx,hy,hrC*0.32,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='rgba(255,61,113,0.65)';ctx.font='700 7px Space Mono';ctx.textAlign='center';
-  ctx.fillText(lvl.holeMoving?'◀  ▶':'GOAL',hx,hy+hr+12);
+  ctx.fillText(lvl.holeMoving?'◀  ▶':'GOAL',hx,hy+hrC+12);
 
   // Ball
   const bp=ball.position, br=CELL*0.35;
   const bouncy=lvl.bouncyBall;
   const bg=ctx.createRadialGradient(bp.x,bp.y,0,bp.x,bp.y,br*2.5);
-  bg.addColorStop(0,bouncy?'rgba(255,224,102,0.4)':'rgba(0,229,255,0.35)');
-  bg.addColorStop(1,'transparent');
+  bg.addColorStop(0,bouncy?'rgba(255,224,102,0.4)':'rgba(0,229,255,0.35)'); bg.addColorStop(1,'transparent');
   ctx.fillStyle=bg;ctx.beginPath();ctx.arc(bp.x,bp.y,br*2.5,0,Math.PI*2);ctx.fill();
   const bbg=ctx.createRadialGradient(bp.x-br*0.3,bp.y-br*0.3,0,bp.x,bp.y,br);
   if(bouncy){bbg.addColorStop(0,'#fff3a0');bbg.addColorStop(0.55,'#ffe066');bbg.addColorStop(1,'#92400e');}
   else{bbg.addColorStop(0,'#9efeff');bbg.addColorStop(0.55,'#00e5ff');bbg.addColorStop(1,'#005f7a');}
   ctx.fillStyle=bbg;ctx.beginPath();ctx.arc(bp.x,bp.y,br,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='rgba(255,255,255,0.28)';ctx.beginPath();ctx.arc(bp.x-br*0.27,bp.y-br*0.27,br*0.2,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=bouncy?'rgba(255,224,102,0.65)':'rgba(0,229,255,0.55)';
-  ctx.font='700 7px Space Mono';ctx.textAlign='center';
-  ctx.fillText(bouncy?'BOUNCY':'BALL',bp.x,bp.y-br-5);
+  
+  if(!gameRunning) {
+      ctx.fillStyle=bouncy?'rgba(255,224,102,0.65)':'rgba(0,229,255,0.55)';
+      ctx.font='700 7px Space Mono';ctx.textAlign='center';
+      ctx.fillText(bouncy?'BOUNCY':'BALL',bp.x,bp.y-br-5);
+  }
+
+  // Particles
+  for(let i=particles.length-1; i>=0; i--) {
+      let p = particles[i];
+      p.vy += 0.5; // gravity
+      p.x += p.vx; p.y += p.vy;
+      p.rot += p.rotSpeed;
+      p.life -= p.decay;
+      if(p.life <= 0) { particles.splice(i, 1); }
+      else {
+          ctx.save(); ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+          ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+          ctx.restore();
+      }
+  }
 
   requestAnimationFrame(render);
 }
