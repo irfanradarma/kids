@@ -232,7 +232,7 @@
     <a class="card" href="rocketman.html">
       <div class="card-emoji">🚀</div>
       <span class="card-tag">Logic &amp; Coding</span>
-      <h2>Logic Bot</h2>
+      <h2>Apollo Exploration</h2>
       <p>Bantu roket menemukan jalan ke bumi! Susun perintah dengan benar dan selesaikan labirin luar angkasa.</p>
       <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
     </a>
@@ -241,7 +241,7 @@
     <a class="card" href="gravity.html">
       <div class="card-emoji">🌊</div>
       <span class="card-tag">Physics Puzzle</span>
-      <h2>Gravity Drop</h2>
+      <h2>Ball Drop</h2>
       <p>Jatuhkan blok dan atur gravitasi! Selesaikan tiap level dengan strategi yang tepat.</p>
       <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
     </a>
