@@ -109,6 +109,38 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+<style>
+.home-btn-wrap {
+  position: fixed; top: 12px; left: 12px; z-index: 9999;
+}
+.home-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(15,20,40,0.85);
+  border: 2px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 8px 16px 8px 10px;
+  color: #fff;
+  font-family: 'Boogaloo', 'Fredoka One', cursive, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(12px);
+  transition: background 0.18s, border-color 0.18s, transform 0.15s;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  white-space: nowrap;
+}
+.home-btn:hover { background: rgba(30,40,80,0.97); border-color: rgba(255,255,255,0.4); transform: scale(1.05); }
+.home-btn:active { transform: scale(0.96); }
+.home-btn .hico { font-size: 1.2rem; line-height:1; }
+</style>
+<div class="home-btn-wrap">
+  <a class="home-btn" href="README.md" title="Back to Game Library">
+    <span class="hico">🪐</span> Game Zone
+  </a>
+</div>
+
 
     <header class="w-full p-4 flex justify-between items-center bg-slate-800 shadow-md">
         <h1 class="text-xl md:text-2xl font-bold text-blue-400 tracking-wide">Flag<span class="text-white">Guesser</span></h1>
