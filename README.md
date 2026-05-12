@@ -245,6 +245,15 @@
       <p>Jatuhkan blok dan atur gravitasi! Selesaikan tiap level dengan strategi yang tepat.</p>
       <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
     </a>
+
+    <!-- Game 3 -->
+    <a class="card" href="flag.html">
+      <div class="card-emoji">🌎</div>
+      <span class="card-tag">General Knowledge</span>
+      <h2>Flag Guess</h2>
+      <p>Tebak nama negara dari benderanya</p>
+      <div class="card-cta">Main Sekarang <span class="arrow">→</span></div>
+    </a>
   </div>
 
   <footer class="footer">
