@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Space Sudoku – Kids Game Zone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════
+       DESIGN TOKENS  (match hub theme)
+    ═══════════════════════════════════════ */
+    :root {
+      --bg:      #070714;
+      --surface: #0f0f24;
+      --surface2:#14142e;
+      --border:  rgba(255,255,255,0.08);
+      --white:   #ffffff;
+      --muted:   rgba(255,255,255,0.45);
+
+      --accent:  #a78bfa;   /* purple – sudoku's unique colour */
+      --accentg: rgba(167,139,250,0.25);
+      --accentb: rgba(167,139,250,0.12);
+
+      --green:   #22c55e;
+      --red:     #f87171;
+      --yellow:  #ffc43d;
+
+      --spring: cubic-bezier(0.34,1.56,0.64,1);
+      --ease:   cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html, body {
+      width:100%; min-height:100%;
+      font-family:'Baloo 2', cursive;
+      background: var(--bg);
+      color: var(--white);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      overflow-x: hidden;
+    }
+
+    /* ── COSMOS BG ── */
+    #cosmos {
+      position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+    }
+    .nebula {
+      position:absolute; border-radius:50%;
+      filter:blur(90px); opacity:0.14;
+      animation:nebFloat var(--nd,18s) ease-in-out infinite alternate;
+    }
+    .neb1{width:600px;height:380px;background:#5533ff;top:-100px;left:-150px;--nd:21s;}
+    .neb2{width:450px;height:320px;background:#7c3aed;bottom:-80px;right:-100px;--nd:16s;}
+    .neb3{width:350px;height:260px;background:#a855f7;top:40%;left:55%;--nd:24s;}
+    @keyframes nebFloat{from{transform:translate(0,0);}to{transform:translate(24px,16px);}}
+    .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite alternate;}
+    @keyframes twinkle{from{opacity:0.08;transform:scale(1);}to{opacity:0.9;transform:scale(1.6);}}
+
+    /* ── LAYOUT ── */
+    .page {
+      position:relative; z-index:1;
+      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh;
+      padding: 0 0 60px;
+    }
+
+    /* ── HEADER ── */
+    .top-bar {
+      width:100%;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 16px;
+      background:rgba(7,7,20,0.88);
+      border-bottom:1.5px solid var(--border);
+      backdrop-filter:blur(14px);
+      position:sticky; top:0; z-index:20;
+    }
+    .home-btn {
+      display:flex; align-items:center; gap:7px;
+      padding:7px 16px 7px 10px;
+      background:rgba(255,255,255,0.07);
+      border:1.5px solid rgba(255,255,255,0.14);
+      border-radius:999px;
+      color:var(--white);
+      font-family:'Baloo 2',cursive; font-size:0.9rem; font-weight:700;
+      cursor:pointer; text-decoration:none; white-space:nowrap;
+      transition:background 0.18s,border-color 0.18s,transform 0.15s;
+    }
+    .home-btn:hover{background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.3);}
+    .home-btn:active{transform:scale(0.96);}
+    .home-ico{font-size:1.15rem;}
+
+    .game-title {
+      font-family:'Boogaloo',cursive;
+      font-size:1.4rem; letter-spacing:0.5px;
+      color:var(--white);
+      text-shadow:0 0 24px var(--accentg);
+    }
+    .title-glow { color:var(--accent); }
+
+    /* Stat chips */
+    .stat-chips {
+      display:flex; gap:8px; align-items:center;
+    }
+    .chip {
+      display:flex; flex-direction:column; align-items:center;
+      padding:4px 12px;
+      background:rgba(255,255,255,0.06);
+      border:1.5px solid var(--border);
+      border-radius:12px;
+      font-size:0.6rem; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted);
+      line-height:1.2;
+    }
+    .chip-val {
+      font-size:0.95rem; font-weight:800;
+      color:var(--white); letter-spacing:0;
+    }
+    .chip-val.red   { color:var(--red); }
+    .chip-val.green { color:var(--green); }
+
+    /* ── SETTINGS BAR ── */
+    .settings-bar {
+      width:100%; max-width:520px;
+      display:flex; gap:10px; align-items:center;
+      padding:10px 16px;
+      margin-top:12px;
+    }
+    .sel-wrap {
+      flex:1;
+      position:relative;
+    }
+    .sel-wrap select {
+      width:100%;
+      appearance:none; -webkit-appearance:none;
+      background:var(--surface2);
+      border:1.5px solid var(--border);
+      border-radius:14px;
+      padding:10px 36px 10px 14px;
+      color:var(--white);
+      font-family:'Baloo 2',cursive; font-size:0.85rem; font-weight:700;
+      cursor:pointer; outline:none;
+      transition:border-color 0.18s;
+    }
+    .sel-wrap select:focus { border-color:var(--accent); }
+    .sel-wrap::after {
+      content:'▾';
+      position:absolute; right:12px; top:50%; transform:translateY(-50%);
+      color:var(--muted); font-size:0.9rem; pointer-events:none;
+    }
+    .sel-wrap select option { background:#1a1a3e; color:#fff; }
+
+    /* ── BOARD ── */
+    .board-wrap {
+      width:100%; max-width:520px;
+      padding:0 12px;
+      margin-top:12px;
+    }
+    #board-container {
+      width:100%;
+      aspect-ratio:1/1;
+      background:var(--surface);
+      border:3px solid rgba(167,139,250,0.5);
+      border-radius:18px;
+      padding:6px;
+      position:relative;
+      box-shadow:0 0 40px var(--accentg), 0 12px 40px rgba(0,0,0,0.6);
+      overflow:hidden;
+    }
+    /* Loading overlay */
+    #loading-overlay {
+      position:absolute; inset:0; z-index:10;
+      background:rgba(7,7,20,0.92);
+      border-radius:14px;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:12px;
+    }
+    #loading-overlay.hidden { display:none; }
+    .spin-planet { font-size:44px; animation:spinPlanet 1s linear infinite; }
+    @keyframes spinPlanet{to{transform:rotate(360deg);}}
+    .loading-txt { font-family:'Boogaloo',cursive; font-size:1rem; color:var(--muted); letter-spacing:0.8px; }
+
+    #sudoku-grid {
+      width:100%; height:100%;
+      display:grid;
+    }
+    .sudoku-grid-6 { grid-template-columns:repeat(6,1fr); }
+    .sudoku-grid-9 { grid-template-columns:repeat(9,1fr); }
+
+    /* ── CELLS ── */
+    .sudoku-cell {
+      display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(255,255,255,0.07);
+      background:transparent;
+      cursor:pointer;
+      transition:background 0.12s, color 0.12s;
+      font-family:'Baloo 2',cursive;
+      font-size:clamp(0.9rem,2.8vw,1.35rem);
+      font-weight:800;
+      user-select:none;
+      position:relative;
+    }
+    /* Block dividers */
+    .cell-border-right  { border-right-color:rgba(167,139,250,0.55) !important; border-right-width:2px !important; }
+    .cell-border-bottom { border-bottom-color:rgba(167,139,250,0.55) !important; border-bottom-width:2px !important; }
+
+    /* Cell states */
+    .cell-prefilled  { color:var(--white); }
+    .cell-user-input { color:var(--accent); }
+    .cell-highlight  { background:rgba(167,139,250,0.08); }
+    .cell-same-num   { background:rgba(167,139,250,0.18); }
+    .cell-selected   { background:rgba(167,139,250,0.30) !important; }
+    .cell-error-flash { animation:errFlash 0.45s ease; }
+    @keyframes errFlash{0%,100%{background:transparent;}50%{background:rgba(248,113,113,0.35);}}
+
+    /* ── NUMPAD ── */
+    .numpad-wrap {
+      width:100%; max-width:520px;
+      padding:0 12px;
+      margin-top:14px;
+    }
+    #numpad {
+      display:grid;
+      gap:8px;
+    }
+    .num-btn {
+      background:var(--surface2);
+      border:1.5px solid var(--border);
+      border-radius:14px;
+      color:var(--white);
+      font-family:'Boogaloo',cursive;
+      font-size:clamp(1.1rem,3vw,1.5rem);
+      padding:10px 4px;
+      cursor:pointer;
+      transition:background 0.15s, border-color 0.15s, transform 0.12s var(--spring);
+      box-shadow:0 4px 0 rgba(0,0,0,0.35);
+    }
+    .num-btn:hover  { background:var(--accentb); border-color:var(--accent); }
+    .num-btn:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,0.35); }
+
+    /* ── TOOL BUTTONS ── */
+    .tools-wrap {
+      width:100%; max-width:520px;
+      padding:0 12px;
+      margin-top:14px;
+      display:flex; justify-content:center; gap:16px;
+    }
+    .tool-btn {
+      display:flex; flex-direction:column; align-items:center; gap:5px;
+      cursor:pointer;
+      background:none; border:none;
+      color:var(--muted);
+      transition:color 0.18s, transform 0.15s;
+    }
+    .tool-btn:hover { color:var(--white); transform:translateY(-3px); }
+    .tool-btn:active { transform:scale(0.94); }
+    .tool-btn.disabled { opacity:0.3; pointer-events:none; }
+    .tool-icon {
+      width:52px; height:52px; border-radius:16px;
+      background:var(--surface2);
+      border:1.5px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem;
+      transition:background 0.18s, border-color 0.18s;
+      position:relative;
+    }
+    .tool-btn:hover .tool-icon { background:var(--accentb); border-color:var(--accent); }
+    .tool-label { font-size:0.7rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; }
+    .hints-badge {
+      position:absolute; top:-6px; right:-6px;
+      width:18px; height:18px;
+      background:var(--red);
+      border-radius:50%;
+      font-size:0.65rem; font-weight:800;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff;
+      font-family:'Baloo 2',cursive;
+    }
+
+    /* ── MODAL ── */
+    #modal-backdrop {
+      position:fixed; inset:0; z-index:100;
+      background:rgba(7,7,20,0.85);
+      backdrop-filter:blur(12px);
+      display:flex; align-items:center; justify-content:center;
+      padding:20px;
+      opacity:0; pointer-events:none;
+      transition:opacity 0.3s var(--ease);
+    }
+    #modal-backdrop.show { opacity:1; pointer-events:all; }
+    .modal-box {
+      background:var(--surface);
+      border:2px solid var(--border);
+      border-radius:28px;
+      padding:32px 28px;
+      max-width:360px; width:100%;
+      text-align:center;
+      transform:scale(0.9);
+      transition:transform 0.3s var(--spring);
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    }
+    #modal-backdrop.show .modal-box { transform:scale(1); }
+    .modal-icon-ring {
+      width:80px; height:80px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.6rem;
+      margin:0 auto 16px;
+    }
+    .modal-title {
+      font-family:'Boogaloo',cursive;
+      font-size:2rem; color:var(--white); margin-bottom:6px;
+    }
+    .modal-desc {
+      font-size:0.88rem; font-weight:600; color:var(--muted);
+      line-height:1.6; margin-bottom:24px;
+    }
+    .modal-btn {
+      width:100%;
+      padding:14px;
+      border:none; border-radius:16px;
+      font-family:'Boogaloo',cursive; font-size:1.1rem; letter-spacing:0.5px;
+      cursor:pointer;
+      background:var(--accent); color:#000;
+      box-shadow:0 6px 0 rgba(0,0,0,0.4);
+      transition:transform 0.12s var(--spring), box-shadow 0.12s;
+    }
+    .modal-btn:hover  { transform:translateY(-3px); box-shadow:0 9px 0 rgba(0,0,0,0.4); }
+    .modal-btn:active { transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,0.4); }
+  </style>
+</head>
+<body>
+
+<!-- COSMOS -->
+<div id="cosmos">
+  <div class="nebula neb1"></div>
+  <div class="nebula neb2"></div>
+  <div class="nebula neb3"></div>
+</div>
+
+<div class="page">
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <a class="home-btn" href="README.md" title="Back to Game Library">
+      <span class="home-ico">🪐</span> Game Zone
+    </a>
+    <span class="game-title">SUDO<span class="title-glow">KU</span></span>
+    <div class="stat-chips">
+      <div class="chip">
+        <span class="chip-val red" id="mistakes-display">0/3</span>
+        <span>Mistakes</span>
+      </div>
+      <div class="chip">
+        <span class="chip-val green" id="timer-display">00:00</span>
+        <span>Time</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SETTINGS -->
+  <div class="settings-bar">
+    <div class="sel-wrap">
+      <select id="grid-size">
+        <option value="6">6×6 Kids</option>
+        <option value="9" selected>9×9 Classic</option>
+      </select>
+    </div>
+    <div class="sel-wrap">
+      <select id="difficulty">
+        <option value="easy">Easy ⭐</option>
+        <option value="medium" selected>Medium ⭐⭐</option>
+        <option value="hard">Hard ⭐⭐⭐</option>
+        <option value="expert">Expert 🔥</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- BOARD -->
+  <div class="board-wrap">
+    <div id="board-container">
+      <div id="loading-overlay" class="hidden">
+        <span class="spin-planet">🪐</span>
+        <span class="loading-txt">Generating puzzle…</span>
+      </div>
+      <div id="sudoku-grid" class="sudoku-grid-9"></div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="tools-wrap">
+    <button class="tool-btn" id="btn-new-game" title="New game">
+      <div class="tool-icon">🔄</div>
+      <span class="tool-label">New</span>
+    </button>
+    <button class="tool-btn" id="btn-erase" title="Erase cell">
+      <div class="tool-icon">🗑️</div>
+      <span class="tool-label">Erase</span>
+    </button>
+    <button class="tool-btn" id="btn-hint" title="Use a hint">
+      <div class="tool-icon">
+        💡
+        <span class="hints-badge" id="hints-badge">3</span>
+      </div>
+      <span class="tool-label">Hint</span>
+    </button>
+  </div>
+
+  <!-- NUMPAD -->
+  <div class="numpad-wrap">
+    <div id="numpad"></div>
+  </div>
+
+</div><!-- .page -->
+
+<!-- MODAL -->
+<div id="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-icon-ring" id="modal-icon-ring">
+      <span id="modal-icon-emoji"></span>
+    </div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-desc"  id="modal-desc"></div>
+    <button class="modal-btn" id="modal-btn">Play Again</button>
+  </div>
+</div>
+
+<script>
+/* ══ COSMOS STARS ══ */
+(function(){
+  const c=document.getElementById('cosmos');
+  const n=window.innerWidth>900?150:70;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2+0.3;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1.5).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s`;
+    c.appendChild(s);
+  }
+})();
+
+/* ══ STATE ══ */
+const MAX_MISTAKES = 3;
+const MAX_HINTS    = 3;
+let boardSize=9, blockW=3, blockH=3;
+let solution=[], puzzle=[], currentGrid=[];
+let selRow=-1, selCol=-1;
+let mistakes=0, hintsLeft=MAX_HINTS;
+let timerSec=0, timerInterval=null, gameActive=false;
+
+/* ══ DOM ══ */
+const gridEl    = document.getElementById('sudoku-grid');
+const numpadEl  = document.getElementById('numpad');
+const sizeEl    = document.getElementById('grid-size');
+const diffEl    = document.getElementById('difficulty');
+const mistEl    = document.getElementById('mistakes-display');
+const timeEl    = document.getElementById('timer-display');
+const hintBadge = document.getElementById('hints-badge');
+const loadEl    = document.getElementById('loading-overlay');
+const backdrop  = document.getElementById('modal-backdrop');
+const mTitle    = document.getElementById('modal-title');
+const mDesc     = document.getElementById('modal-desc');
+const mIcon     = document.getElementById('modal-icon-emoji');
+const mRing     = document.getElementById('modal-icon-ring');
+const mBtn      = document.getElementById('modal-btn');
+
+/* ══ EVENTS ══ */
+document.addEventListener('DOMContentLoaded', initGame);
+document.getElementById('btn-new-game').addEventListener('click', initGame);
+document.getElementById('btn-erase').addEventListener('click', eraseCell);
+document.getElementById('btn-hint').addEventListener('click', useHint);
+mBtn.addEventListener('click', hideModal);
+sizeEl.addEventListener('change', e=>{ updateDiffOpts(e.target.value); initGame(); });
+diffEl.addEventListener('change', initGame);
+document.addEventListener('keydown', e=>{
+  if(!gameActive||selRow===-1) return;
+  const k=e.key;
+  if(k>='1'&&k<=boardSize.toString()) inputNumber(parseInt(k));
+  else if(k==='Backspace'||k==='Delete') eraseCell();
+  else if(k==='ArrowUp'   &&selRow>0)           selectCell(selRow-1,selCol);
+  else if(k==='ArrowDown' &&selRow<boardSize-1) selectCell(selRow+1,selCol);
+  else if(k==='ArrowLeft' &&selCol>0)           selectCell(selRow,selCol-1);
+  else if(k==='ArrowRight'&&selCol<boardSize-1) selectCell(selRow,selCol+1);
+});
+
+/* ══ INIT ══ */
+function updateDiffOpts(size){
+  const is9=size==='9';
+  diffEl.innerHTML=`
+    <option value="easy">Easy ⭐</option>
+    <option value="medium" selected>Medium ⭐⭐</option>
+    <option value="hard">Hard ⭐⭐⭐</option>
+    ${is9?'<option value="expert">Expert 🔥</option>':''}`;
+}
+
+async function initGame(){
+  gameActive=false; stopTimer();
+  loadEl.classList.remove('hidden');
+  await new Promise(r=>setTimeout(r,50));
+
+  boardSize=parseInt(sizeEl.value);
+  blockW=3; blockH=boardSize===6?2:3;
+  mistakes=0; hintsLeft=MAX_HINTS; timerSec=0; selRow=-1; selCol=-1;
+
+  updateStatsUI(); buildNumpad();
+  gridEl.className=`sudoku-grid-${boardSize}`;
+  generateSudoku(); renderBoard();
+  loadEl.classList.add('hidden');
+  startTimer(); gameActive=true;
+}
+
+/* ══ GENERATOR ══ */
+function generateSudoku(){
+  solution=Array(boardSize).fill().map(()=>Array(boardSize).fill(0));
+  solveGrid(solution);
+  puzzle=solution.map(r=>[...r]);
+  currentGrid=solution.map(r=>[...r]);
+  removeNumbers();
+}
+function solveGrid(g){
+  const e=findEmpty(g); if(!e) return true;
+  const [r,c]=e;
+  const nums=Array.from({length:boardSize},(_,i)=>i+1);
+  shuffle(nums);
+  for(const n of nums){
+    if(isValid(g,r,c,n)){
+      g[r][c]=n; if(solveGrid(g)) return true; g[r][c]=0;
+    }
+  }
+  return false;
+}
+function findEmpty(g){
+  for(let r=0;r<boardSize;r++) for(let c=0;c<boardSize;c++) if(g[r][c]===0) return[r,c];
+  return null;
+}
+function isValid(g,row,col,num){
+  for(let i=0;i<boardSize;i++){if(g[row][i]===num||g[i][col]===num) return false;}
+  const sr=Math.floor(row/blockH)*blockH, sc=Math.floor(col/blockW)*blockW;
+  for(let r=0;r<blockH;r++) for(let c=0;c<blockW;c++) if(g[sr+r][sc+c]===num) return false;
+  return true;
+}
+function removeNumbers(){
+  const d=diffEl.value;
+  let n= boardSize===6
+    ? {easy:12,medium:18,hard:22}[d]||18
+    : {easy:30,medium:40,hard:50,expert:58}[d]||40;
+  while(n>0){
+    const r=Math.floor(Math.random()*boardSize), c=Math.floor(Math.random()*boardSize);
+    if(puzzle[r][c]!==0){ puzzle[r][c]=0; currentGrid[r][c]=0; n--; }
+  }
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
+
+/* ══ RENDER ══ */
+function renderBoard(){
+  gridEl.innerHTML='';
+  for(let r=0;r<boardSize;r++){
+    for(let c=0;c<boardSize;c++){
+      const cell=document.createElement('div');
+      cell.className='sudoku-cell';
+      // block borders
+      if((c+1)%blockW===0&&c!==boardSize-1) cell.classList.add('cell-border-right');
+      if((r+1)%blockH===0&&r!==boardSize-1) cell.classList.add('cell-border-bottom');
+      cell.dataset.row=r; cell.dataset.col=c;
+      const v=currentGrid[r][c];
+      if(v!==0){
+        cell.textContent=v;
+        cell.classList.add(puzzle[r][c]!==0?'cell-prefilled':'cell-user-input');
+      }
+      cell.addEventListener('click',()=>selectCell(r,c));
+      gridEl.appendChild(cell);
+    }
+  }
+  updateHighlights();
+}
+
+function buildNumpad(){
+  numpadEl.innerHTML='';
+  const cols=boardSize===9?'grid-cols-9':'grid-cols-6';
+  numpadEl.className=`grid gap-2 ${cols}`;
+  for(let i=1;i<=boardSize;i++){
+    const b=document.createElement('button');
+    b.className='num-btn'; b.textContent=i;
+    b.addEventListener('click',()=>inputNumber(i));
+    numpadEl.appendChild(b);
+  }
+}
+
+function updateStatsUI(){
+  mistEl.textContent=`${mistakes}/${MAX_MISTAKES}`;
+  hintBadge.textContent=hintsLeft;
+  const hBtn=document.getElementById('btn-hint');
+  hintsLeft===0?hBtn.classList.add('disabled'):hBtn.classList.remove('disabled');
+}
+
+/* ══ INTERACTION ══ */
+function selectCell(r,c){
+  if(!gameActive) return;
+  selRow=r; selCol=c; updateHighlights();
+}
+function updateHighlights(){
+  document.querySelectorAll('.sudoku-cell').forEach(cell=>{
+    cell.classList.remove('cell-selected','cell-highlight','cell-same-num');
+  });
+  if(selRow===-1) return;
+  const sv=currentGrid[selRow][selCol];
+  const sr=Math.floor(selRow/blockH)*blockH, sc=Math.floor(selCol/blockW)*blockW;
+  document.querySelectorAll('.sudoku-cell').forEach(cell=>{
+    const r=+cell.dataset.row, c=+cell.dataset.col, v=currentGrid[r][c];
+    if(r===selRow||c===selCol||(r>=sr&&r<sr+blockH&&c>=sc&&c<sc+blockW))
+      cell.classList.add('cell-highlight');
+    if(sv!==0&&v===sv) cell.classList.add('cell-same-num');
+    if(r===selRow&&c===selCol){ cell.classList.remove('cell-highlight','cell-same-num'); cell.classList.add('cell-selected'); }
+  });
+}
+function inputNumber(num){
+  if(!gameActive||selRow===-1||puzzle[selRow][selCol]!==0) return;
+  if(solution[selRow][selCol]===num){
+    currentGrid[selRow][selCol]=num; renderBoard(); checkWin();
+  } else {
+    mistakes++; updateStatsUI();
+    const cellEl=gridEl.children[selRow*boardSize+selCol];
+    cellEl.classList.remove('cell-error-flash');
+    void cellEl.offsetWidth;
+    cellEl.classList.add('cell-error-flash');
+    if(mistakes>=MAX_MISTAKES) gameOver();
+  }
+}
+function eraseCell(){
+  if(!gameActive||selRow===-1||puzzle[selRow][selCol]!==0) return;
+  currentGrid[selRow][selCol]=0; renderBoard();
+}
+function useHint(){
+  if(!gameActive||hintsLeft<=0||selRow===-1||currentGrid[selRow][selCol]!==0) return;
+  hintsLeft--; inputNumber(solution[selRow][selCol]); updateStatsUI();
+}
+
+/* ══ TIMER ══ */
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    timerSec++;
+    const m=Math.floor(timerSec/60).toString().padStart(2,'0');
+    const s=(timerSec%60).toString().padStart(2,'0');
+    timeEl.textContent=`${m}:${s}`;
+  },1000);
+}
+function stopTimer(){ clearInterval(timerInterval); }
+
+/* ══ WIN / LOSE ══ */
+function checkWin(){
+  for(let r=0;r<boardSize;r++) for(let c=0;c<boardSize;c++) if(currentGrid[r][c]!==solution[r][c]) return;
+  stopTimer(); gameActive=false;
+  showModal('You Won! 🎉','🏆','rgba(34,197,94,0.18)',
+    `Solved ${boardSize}×${boardSize} ${diffEl.value} in ${timeEl.textContent}! Amazing work!`,'Play Again');
+}
+function gameOver(){
+  stopTimer(); gameActive=false;
+  currentGrid=solution.map(r=>[...r]); renderBoard();
+  showModal('Game Over 💔','😢','rgba(248,113,113,0.18)',
+    'Too many mistakes! Better luck next time — the solution is revealed.','Try Again');
+}
+
+/* ══ MODAL ══ */
+function showModal(title,emoji,ringBg,desc,btnTxt){
+  mTitle.textContent=title;
+  mIcon.textContent=emoji;
+  mRing.style.background=ringBg;
+  mDesc.textContent=desc;
+  mBtn.textContent=btnTxt;
+  backdrop.classList.add('show');
+}
+function hideModal(){
+  backdrop.classList.remove('show');
+  setTimeout(initGame, 300);
+}
+</script>
+</body>
+</html>
