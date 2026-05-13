@@ -112,6 +112,12 @@
       color:var(--muted);
       line-height:1.2;
     }
+    .chip.interactive {
+      cursor:pointer;
+      transition:background 0.15s, transform 0.1s;
+    }
+    .chip.interactive:hover { background:rgba(255,255,255,0.12); }
+    .chip.interactive:active { transform:scale(0.95); }
     .chip-val {
       font-size:0.95rem; font-weight:800;
       color:var(--white); letter-spacing:0;
@@ -210,6 +216,7 @@
     .cell-highlight  { background:rgba(167,139,250,0.08); }
     .cell-same-num   { background:rgba(167,139,250,0.18); }
     .cell-selected   { background:rgba(167,139,250,0.30) !important; }
+    .cell-error      { color:var(--red) !important; background:rgba(248,113,113,0.2) !important; }
     .cell-error-flash { animation:errFlash 0.45s ease; }
     @keyframes errFlash{0%,100%{background:transparent;}50%{background:rgba(248,113,113,0.35);}}
 
@@ -217,20 +224,25 @@
     .numpad-wrap {
       width:100%; max-width:520px;
       padding:0 12px;
-      margin-top:14px;
+      margin-top:16px;
     }
     #numpad {
       display:grid;
-      gap:8px;
+      width:100%;
+      /* Dynamic columns applied in JS, and custom responsive gap */
+      gap:clamp(4px, 1.2vw, 8px); 
     }
     .num-btn {
       background:var(--surface2);
       border:1.5px solid var(--border);
-      border-radius:14px;
+      border-radius:clamp(8px, 2vw, 12px);
       color:var(--white);
       font-family:'Boogaloo',cursive;
-      font-size:clamp(1.1rem,3vw,1.5rem);
-      padding:10px 4px;
+      font-size:clamp(1.1rem, 4.5vw, 1.6rem);
+      padding:8px 0; /* Let the grid handle width, keep height padding consistent */
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor:pointer;
       transition:background 0.15s, border-color 0.15s, transform 0.12s var(--spring);
       box-shadow:0 4px 0 rgba(0,0,0,0.35);
@@ -242,11 +254,11 @@
     .tools-wrap {
       width:100%; max-width:520px;
       padding:0 12px;
-      margin-top:14px;
-      display:flex; justify-content:center; gap:16px;
+      margin-top:24px;
+      display:flex; justify-content:center; gap:20px;
     }
     .tool-btn {
-      display:flex; flex-direction:column; align-items:center; gap:5px;
+      display:flex; flex-direction:column; align-items:center; gap:6px;
       cursor:pointer;
       background:none; border:none;
       color:var(--muted);
@@ -256,25 +268,27 @@
     .tool-btn:active { transform:scale(0.94); }
     .tool-btn.disabled { opacity:0.3; pointer-events:none; }
     .tool-icon {
-      width:52px; height:52px; border-radius:16px;
+      width:56px; height:56px; border-radius:18px;
       background:var(--surface2);
       border:1.5px solid var(--border);
       display:flex; align-items:center; justify-content:center;
-      font-size:1.4rem;
+      font-size:1.5rem;
       transition:background 0.18s, border-color 0.18s;
       position:relative;
+      box-shadow:0 4px 0 rgba(0,0,0,0.25);
     }
     .tool-btn:hover .tool-icon { background:var(--accentb); border-color:var(--accent); }
-    .tool-label { font-size:0.7rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; }
+    .tool-label { font-size:0.75rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; }
     .hints-badge {
       position:absolute; top:-6px; right:-6px;
-      width:18px; height:18px;
+      width:20px; height:20px;
       background:var(--red);
       border-radius:50%;
-      font-size:0.65rem; font-weight:800;
+      font-size:0.7rem; font-weight:800;
       display:flex; align-items:center; justify-content:center;
       color:#fff;
       font-family:'Baloo 2',cursive;
+      box-shadow:0 2px 6px rgba(0,0,0,0.4);
     }
 
     /* ── MODAL ── */
@@ -346,7 +360,7 @@
     </a>
     <span class="game-title">SUDO<span class="title-glow">KU</span></span>
     <div class="stat-chips">
-      <div class="chip">
+      <div class="chip interactive" id="mistakes-chip" title="Click to change limit">
         <span class="chip-val red" id="mistakes-display">0/3</span>
         <span>Mistakes</span>
       </div>
@@ -386,7 +400,12 @@
     </div>
   </div>
 
-  <!-- TOOLS -->
+  <!-- NUMPAD (Moved directly below the board) -->
+  <div class="numpad-wrap">
+    <div id="numpad"></div>
+  </div>
+
+  <!-- TOOLS (Moved to the bottom) -->
   <div class="tools-wrap">
     <button class="tool-btn" id="btn-new-game" title="New game">
       <div class="tool-icon">🔄</div>
@@ -403,11 +422,6 @@
       </div>
       <span class="tool-label">Hint</span>
     </button>
-  </div>
-
-  <!-- NUMPAD -->
-  <div class="numpad-wrap">
-    <div id="numpad"></div>
   </div>
 
 </div><!-- .page -->
@@ -438,8 +452,10 @@
 })();
 
 /* ══ STATE ══ */
-const MAX_MISTAKES = 3;
 const MAX_HINTS    = 3;
+const MISTAKE_CAPS = [3, 5, Infinity];
+let currentCapIdx  = 0;
+let maxMistakes    = MISTAKE_CAPS[currentCapIdx];
 let boardSize=9, blockW=3, blockH=3;
 let solution=[], puzzle=[], currentGrid=[];
 let selRow=-1, selCol=-1;
@@ -451,6 +467,7 @@ const gridEl    = document.getElementById('sudoku-grid');
 const numpadEl  = document.getElementById('numpad');
 const sizeEl    = document.getElementById('grid-size');
 const diffEl    = document.getElementById('difficulty');
+const mistChip  = document.getElementById('mistakes-chip');
 const mistEl    = document.getElementById('mistakes-display');
 const timeEl    = document.getElementById('timer-display');
 const hintBadge = document.getElementById('hints-badge');
@@ -467,6 +484,7 @@ document.addEventListener('DOMContentLoaded', initGame);
 document.getElementById('btn-new-game').addEventListener('click', initGame);
 document.getElementById('btn-erase').addEventListener('click', eraseCell);
 document.getElementById('btn-hint').addEventListener('click', useHint);
+mistChip.addEventListener('click', cycleMistakesCap);
 mBtn.addEventListener('click', hideModal);
 sizeEl.addEventListener('change', e=>{ updateDiffOpts(e.target.value); initGame(); });
 diffEl.addEventListener('change', initGame);
@@ -550,6 +568,23 @@ function removeNumbers(){
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}}
 
 /* ══ RENDER ══ */
+function isConflict(row, col) {
+  const v = currentGrid[row][col];
+  if (v === 0) return false;
+  for (let i = 0; i < boardSize; i++) {
+    if (i !== col && currentGrid[row][i] === v) return true;
+    if (i !== row && currentGrid[i][col] === v) return true;
+  }
+  const sr = Math.floor(row / blockH) * blockH;
+  const sc = Math.floor(col / blockW) * blockW;
+  for (let r = 0; r < blockH; r++) {
+    for (let c = 0; c < blockW; c++) {
+      if ((sr + r !== row || sc + c !== col) && currentGrid[sr + r][sc + c] === v) return true;
+    }
+  }
+  return false;
+}
+
 function renderBoard(){
   gridEl.innerHTML='';
   for(let r=0;r<boardSize;r++){
@@ -564,6 +599,7 @@ function renderBoard(){
       if(v!==0){
         cell.textContent=v;
         cell.classList.add(puzzle[r][c]!==0?'cell-prefilled':'cell-user-input');
+        if(isConflict(r, c)) cell.classList.add('cell-error');
       }
       cell.addEventListener('click',()=>selectCell(r,c));
       gridEl.appendChild(cell);
@@ -574,8 +610,9 @@ function renderBoard(){
 
 function buildNumpad(){
   numpadEl.innerHTML='';
-  const cols=boardSize===9?'grid-cols-9':'grid-cols-6';
-  numpadEl.className=`grid gap-2 ${cols}`;
+  // Apply exactly 9 or 6 columns for a single row layout
+  numpadEl.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+  
   for(let i=1;i<=boardSize;i++){
     const b=document.createElement('button');
     b.className='num-btn'; b.textContent=i;
@@ -585,10 +622,17 @@ function buildNumpad(){
 }
 
 function updateStatsUI(){
-  mistEl.textContent=`${mistakes}/${MAX_MISTAKES}`;
+  mistEl.textContent = maxMistakes === Infinity ? `${mistakes}/∞` : `${mistakes}/${maxMistakes}`;
   hintBadge.textContent=hintsLeft;
   const hBtn=document.getElementById('btn-hint');
   hintsLeft===0?hBtn.classList.add('disabled'):hBtn.classList.remove('disabled');
+}
+
+function cycleMistakesCap(){
+  currentCapIdx = (currentCapIdx + 1) % MISTAKE_CAPS.length;
+  maxMistakes = MISTAKE_CAPS[currentCapIdx];
+  updateStatsUI();
+  if(maxMistakes !== Infinity && mistakes >= maxMistakes) gameOver();
 }
 
 /* ══ INTERACTION ══ */
@@ -613,24 +657,35 @@ function updateHighlights(){
 }
 function inputNumber(num){
   if(!gameActive||selRow===-1||puzzle[selRow][selCol]!==0) return;
-  if(solution[selRow][selCol]===num){
-    currentGrid[selRow][selCol]=num; renderBoard(); checkWin();
-  } else {
+  if(currentGrid[selRow][selCol] === num) return; // Prevent double input
+  
+  currentGrid[selRow][selCol] = num;
+  
+  if(solution[selRow][selCol] !== num){
     mistakes++; updateStatsUI();
-    const cellEl=gridEl.children[selRow*boardSize+selCol];
-    cellEl.classList.remove('cell-error-flash');
-    void cellEl.offsetWidth;
-    cellEl.classList.add('cell-error-flash');
-    if(mistakes>=MAX_MISTAKES) gameOver();
+    if(maxMistakes !== Infinity && mistakes >= maxMistakes) {
+      renderBoard();
+      setTimeout(gameOver, 100);
+      return;
+    }
   }
+  
+  renderBoard();
+  checkWin();
 }
 function eraseCell(){
   if(!gameActive||selRow===-1||puzzle[selRow][selCol]!==0) return;
   currentGrid[selRow][selCol]=0; renderBoard();
 }
 function useHint(){
-  if(!gameActive||hintsLeft<=0||selRow===-1||currentGrid[selRow][selCol]!==0) return;
-  hintsLeft--; inputNumber(solution[selRow][selCol]); updateStatsUI();
+  if(!gameActive||hintsLeft<=0||selRow===-1||puzzle[selRow][selCol]!==0) return;
+  if(currentGrid[selRow][selCol] === solution[selRow][selCol]) return; // already correct
+  
+  hintsLeft--; 
+  currentGrid[selRow][selCol] = solution[selRow][selCol];
+  updateStatsUI();
+  renderBoard();
+  checkWin();
 }
 
 /* ══ TIMER ══ */
