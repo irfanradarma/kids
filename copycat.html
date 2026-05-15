@@ -331,6 +331,7 @@
       display:flex;align-items:flex-end;justify-content:center;
       gap:4px;padding:0 8px;
       height:clamp(140px,28vw,200px);
+      touch-action: none;
     }
     .xylo-key{
       flex:1;border-radius:10px 10px 8px 8px;
@@ -687,8 +688,7 @@ function buildKeyboard(){
     key.className=`xylo-key nk-${note.replace('5','')}${note==='C5'?'5':''}`;
     key.style.cssText=`background:${d.hex};height:${d.h}%;`;
     key.innerHTML=`<span style="pointer-events:none">${note.replace('5','')}</span>`;
-    key.addEventListener('mousedown',()=>handleKey(note));
-    key.addEventListener('touchstart',e=>{e.preventDefault();handleKey(note);});
+    key.addEventListener('pointerdown', e=>{ e.preventDefault(); handleKey(note); });
     kb.appendChild(key);
   });
 }
