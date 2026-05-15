@@ -247,6 +247,12 @@
       100%{transform:scale(1) rotate(0);}
     }
 
+    /* Anagram Mode interactive styling */
+    .mode-anagram .word-token { cursor:pointer; transition: color .15s; }
+    .mode-anagram .word-token:hover { color: var(--accent); }
+    .mode-anagram .target-word { color: var(--yellow); }
+    .mode-anagram .solved-word { color: var(--green); }
+
     /* inline input */
     .word-input-wrap { display:inline-block; position:relative; }
     .word-input {
@@ -368,7 +374,7 @@
             <div class="section-label" id="lbl-lang">Language / Bahasa</div>
             <div class="diff-row" id="lang-select">
               <button class="diff-btn selected" data-lang="en">English</button>
-              <button class="diff-btn" data-lang="id">Bahasa Indonesia</button>
+              <button class="diff-btn" data-lang="id">Indonesia</button>
             </div>
           </div>
           <!-- Difficulty -->
@@ -1215,7 +1221,13 @@ function maskWord(word,diff){
   const pool=[];
   for(let i=1;i<arr.length;i++) pool.push(i);
   shuffleArray(pool);
-  const count = diff==='easy'?1 : diff==='medium'?Math.ceil(word.length/2) : word.length-1;
+  
+  // Easy/Medium missing 1. Hard missing 1 or 2.
+  let count = 1;
+  if (diff === 'hard' && word.length >= 4) {
+    count = Math.random() > 0.5 ? 2 : 1;
+  }
+  
   pool.slice(0,count).forEach(i=>{ arr[i]='_'; });
   return arr.join('');
 }
@@ -1241,11 +1253,18 @@ function startGame(){
   gameTitleEl.textContent = App.currentPassage.title;
   App.tokens = tokenize(App.currentPassage.text);
 
+  passageEl.className = 'passage-box ' + (App.mode === 'anagram' ? 'mode-anagram' : '');
+
   // pick targets
   let elig = App.tokens.filter(t=>t.isEligible);
   shuffleArray(elig);
-  const pct = App.difficulty==='easy'?.20 : App.difficulty==='medium'?.40 : .60;
-  const count = Math.min(Math.max(2,Math.floor(elig.length*pct)), elig.length);
+  
+  let minCount = 2, maxCount = 4;
+  if (App.difficulty === 'medium' || App.difficulty === 'hard') {
+    minCount = 5;
+    maxCount = 10;
+  }
+  const count = Math.min(Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount, elig.length);
   App.totalTargets = count;
 
   for(let i=0;i<count;i++){
@@ -1271,7 +1290,11 @@ function renderPassage(){
     span.dataset.id=tok.id;
 
     if(tok.isTarget && !tok.isSolved){
-      span.classList.add('target-word');
+      if (App.mode === 'anagram' && App.difficulty === 'hard') {
+        // No custom target-word class; it looks like a normal word!
+      } else {
+        span.classList.add('target-word');
+      }
       span.textContent=tok.display;
       span.addEventListener('click',()=>openInput(tok,span));
     } else if(tok.isSolved){
@@ -1281,8 +1304,8 @@ function renderPassage(){
       span.textContent=tok.original;
       if(App.mode==='anagram'){
         span.addEventListener('click',()=>{
-          // brief green flash — this word is already correct
-          span.style.color='var(--green)';
+          // brief red flash — this is a mistake, clicking a correct word!
+          span.style.color='var(--red)';
           setTimeout(()=>span.style.color='',500);
           if(App.score>0){ App.score=Math.max(0,App.score-1); refreshStats(); }
         });
@@ -1368,23 +1391,31 @@ function onMistake(inp){
 }
 
 function giveHint(){
-  const unsolved = App.tokens.filter(t=>t.isTarget && !t.isSolved);
-  if(!unsolved.length) return;
+  // Find the first unsolved target word that hasn't been completely revealed yet
+  let tok = App.tokens.find(t => t.isTarget && !t.isSolved && t.display !== t.original);
+  
+  if(!tok) return; // If all unsolved words are already fully visually revealed, do nothing
+
   App.hintsUsed++; App.streak=0;
   App.score=Math.max(0,App.score-25);
   refreshStats(); Audio.click();
 
-  // pick random unsolved token
-  const tok = unsolved[Math.floor(Math.random() * unsolved.length)];
-
   if(App.mode==='fill'){
-    const arr=tok.display.split('');
-    for(let i=0;i<arr.length;i++){
-      if(arr[i]==='_'){ arr[i]=tok.original[i]; break; }
+    // Find the first blank and reveal exactly that letter
+    const missingIdx = tok.display.indexOf('_');
+    if (missingIdx !== -1) {
+      const arr = tok.display.split('');
+      arr[missingIdx] = tok.original[missingIdx];
+      tok.display = arr.join('');
     }
-    tok.display=arr.join('');
   } else {
-    tok.display=tok.original.substring(0,2)+tok.display.substring(2);
+    // Anagram Mode: First hint reveals 2 letters. Second hint reveals the whole word.
+    const hinted = tok.original.substring(0,2) + tok.display.substring(2);
+    if (tok.display !== hinted) {
+      tok.display = hinted;
+    } else {
+      tok.display = tok.original;
+    }
   }
   renderPassage();
 }
