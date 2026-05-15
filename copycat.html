@@ -283,7 +283,49 @@
     .dur-bar{border-radius:4px;height:8px;background:var(--muted);}
     .dur-btn.selected .dur-bar{background:var(--accent);}
 
-    /* ── XYLOPHONE KEYBOARD ── */
+    /* ── LIVES PICKER (intro) ── */
+    .lives-picker-wrap{
+      display:flex;flex-direction:column;gap:10px;
+    }
+    .section-label{
+      font-size:.65rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+      color:var(--muted);text-align:center;
+    }
+    .lives-row-pick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+    .lives-opt{
+      display:flex;flex-direction:column;align-items:center;gap:5px;
+      padding:10px 14px;border-radius:16px;min-width:70px;
+      background:var(--surface2);border:2px solid var(--border);
+      font-family:'Boogaloo',cursive;font-size:1rem;color:var(--muted);
+      cursor:pointer;
+      transition:border-color .18s,background .18s,color .18s,transform .15s var(--spring);
+    }
+    .lives-opt:hover{border-color:var(--accent);color:var(--white);}
+    .lives-opt.selected{
+      border-color:var(--accent);background:var(--accentb);color:var(--white);
+      box-shadow:0 0 0 1px var(--accent);
+      transform:translateY(-3px);
+    }
+    .lives-opt .lo-icons{font-size:1.1rem;letter-spacing:1px;}
+
+    /* ── ARENA HEADER (label + inline play btn) ── */
+    .arena-header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:2px;
+    }
+    .arena-play-btn{
+      display:flex;align-items:center;gap:5px;
+      padding:5px 12px;border-radius:10px;
+      background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.13);
+      font-family:'Baloo 2',cursive;font-size:.76rem;font-weight:700;color:var(--muted);
+      cursor:pointer;
+      transition:background .18s,border-color .18s,color .18s,transform .12s;
+      white-space:nowrap;
+    }
+    .arena-play-btn:hover{background:var(--accentb);border-color:var(--accent);color:var(--white);}
+    .arena-play-btn:active{transform:scale(0.95);}
+    .arena-play-btn.playing{color:var(--accent);border-color:var(--accent);background:var(--accentb);}
+    .arena-play-btn .btn-hint-ico{font-size:.9rem;}
     .keyboard-wrap{
       width:100%;max-width:680px;margin:0 auto;
       display:flex;align-items:flex-end;justify-content:center;
@@ -408,6 +450,28 @@
         <div class="hero-sub">Listen, Remember, and Play!</div>
       </div>
 
+      <div class="panel lives-picker-wrap" style="padding:18px 20px;">
+        <div class="section-label" style="margin-bottom:10px;">Number of Lives</div>
+        <div class="lives-row-pick">
+          <div class="lives-opt" data-lives="1" onclick="selectLives(1)">
+            <span class="lo-icons">❤️</span>
+            <span>1 Life</span>
+          </div>
+          <div class="lives-opt selected" data-lives="3" onclick="selectLives(3)">
+            <span class="lo-icons">❤️❤️❤️</span>
+            <span>3 Lives</span>
+          </div>
+          <div class="lives-opt" data-lives="5" onclick="selectLives(5)">
+            <span class="lo-icons">❤️❤️❤️❤️❤️</span>
+            <span>5 Lives</span>
+          </div>
+          <div class="lives-opt" data-lives="999" onclick="selectLives(999)">
+            <span class="lo-icons">♾️</span>
+            <span>Unlimited</span>
+          </div>
+        </div>
+      </div>
+
       <div class="panel" style="padding:18px 20px;">
         <div style="font-size:.65rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:12px;">Choose Mode</div>
         <div class="mode-grid">
@@ -455,9 +519,7 @@
       <div class="level-chip">🎵 Lvl <span id="ui-level">1</span></div>
       <div class="lives-row" id="ui-lives">❤️❤️❤️</div>
       <div style="display:flex;gap:7px;">
-        <div class="icon-btn" id="btn-replay" title="Replay melody" onclick="replayTarget()">▶</div>
-        <div class="icon-btn" id="btn-hint"   title="Hint"           onclick="giveHint()">💡</div>
-        <div class="icon-btn" title="Quit"    onclick="returnToMenu()">✖</div>
+        <div class="icon-btn" title="Quit" onclick="returnToMenu()">✖</div>
       </div>
     </div>
 
@@ -465,7 +527,12 @@
 
       <!-- Target melody -->
       <div class="arena" id="target-area">
-        <div class="arena-label">Target Melody</div>
+        <div class="arena-header">
+          <div class="arena-label">Target Melody</div>
+          <div class="arena-play-btn" id="btn-replay-inline" onclick="replayTarget()" title="Replay melody">
+            ▶ Play Again
+          </div>
+        </div>
         <div class="melody-row" id="target-melody-display"></div>
       </div>
 
@@ -474,7 +541,17 @@
 
       <!-- Player melody -->
       <div class="arena" id="player-area">
-        <div class="arena-label">Your Turn</div>
+        <div class="arena-header">
+          <div class="arena-label">Your Turn</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div class="arena-play-btn" id="btn-play-player" onclick="playPlayerMelody()" title="Play back your melody">
+              ▶ Play
+            </div>
+            <div class="arena-play-btn" id="btn-hint-inline" onclick="giveHint()" title="Hint — reveal next note">
+              <span class="btn-hint-ico">💡</span> Hint
+            </div>
+          </div>
+        </div>
         <div class="melody-row" id="player-melody-display"></div>
         <div class="arena-controls" id="submit-controls" style="display:none;">
           <div class="ctrl-btn" onclick="clearInput()">🗑 Clear</div>
@@ -549,9 +626,10 @@ const NOTE_KEYS = Object.keys(NOTES);
 
 /* ══ STATE ══ */
 let S = {
-  mode:'none', level:1, score:0, lives:3, streak:0,
+  mode:'none', level:1, score:0, lives:3, maxLives:3, streak:0,
   bpm:100, targetMelody:[], playerMelody:[],
   isPlaying:false, currentDur:1,
+  isAutoPlay:false,   /* true only during the automatic start-of-round playback */
   audioCtx:null
 };
 
@@ -562,7 +640,11 @@ function initAudio(){
 }
 function playTone(note,dur,isTarget=false){
   if(!S.audioCtx) return;
-  if(!isTarget) flashKey(note);
+  /* Flash the key only when:
+     - it's a player input (isTarget=false), OR
+     - it's the automatic start-of-round playback (isAutoPlay=true)
+     Never flash during a manual replay triggered after the round starts */
+  if(!isTarget || S.isAutoPlay) flashKey(note);
   const d=NOTES[note]; if(!d) return;
   const osc=S.audioCtx.createOscillator(), g=S.audioCtx.createGain();
   osc.type='sine'; osc.frequency.value=d.freq;
@@ -624,10 +706,14 @@ function refreshStats(){
   document.getElementById('ui-level').textContent  = S.level;
   // lives
   const lv=document.getElementById('ui-lives'); lv.innerHTML='';
-  for(let i=0;i<3;i++){
-    const sp=document.createElement('span');
-    sp.textContent=i<S.lives?'❤️':'🖤';
-    lv.appendChild(sp);
+  if(S.maxLives===999){
+    lv.textContent='♾️';
+  } else {
+    for(let i=0;i<S.maxLives;i++){
+      const sp=document.createElement('span');
+      sp.textContent=i<S.lives?'❤️':'🖤';
+      lv.appendChild(sp);
+    }
   }
 }
 function setStatus(txt,cls=''){
@@ -677,35 +763,48 @@ function setDuration(dur){
   playSfx('click');
 }
 
+/* ══ LIVES SELECTION ══ */
+function selectLives(n){
+  S.maxLives=n;
+  document.querySelectorAll('.lives-opt').forEach(el=>{
+    el.classList.toggle('selected', parseInt(el.dataset.lives)===n);
+  });
+  playSfx('click');
+}
+
 /* ══ GAME FLOW ══ */
 function startGame(mode){
   initAudio();
-  S.mode=mode; S.level=1; S.score=0; S.lives=3; S.streak=0;
+  S.mode=mode; S.level=1; S.score=0; S.lives=S.maxLives; S.streak=0;
   document.getElementById('screen-intro').classList.remove('active');
   document.getElementById('screen-game').classList.add('active');
 
-  const picker=document.getElementById('dur-picker');
-  const submitC=document.getElementById('submit-controls');
-  const replayBtn=document.getElementById('btn-replay');
-  const hintBtn=document.getElementById('btn-hint');
+  const picker       = document.getElementById('dur-picker');
+  const submitC      = document.getElementById('submit-controls');
+  const replayInl    = document.getElementById('btn-replay-inline');
+  const hintInl      = document.getElementById('btn-hint-inline');
+  const playPlayerBtn= document.getElementById('btn-play-player');
 
   if(mode==='easy'){
     picker.classList.remove('visible');
     submitC.style.display='flex';
-    replayBtn.style.display='flex';
-    hintBtn.style.display='flex';
+    replayInl.style.display='flex';
+    hintInl.style.display='flex';
+    playPlayerBtn.style.display='flex';
   } else if(mode==='freeplay'){
     picker.classList.add('visible');
     submitC.style.display='none';
-    replayBtn.style.display='none';
-    hintBtn.style.display='none';
+    replayInl.style.display='none';
+    hintInl.style.display='none';
+    playPlayerBtn.style.display='flex';   /* still useful in freeplay to hear back what you played */
     document.getElementById('target-area').style.display='none';
     setStatus('Play whatever you want! 🎵','good');
   } else {
     picker.classList.add('visible');
     submitC.style.display='flex';
-    replayBtn.style.display='flex';
-    hintBtn.style.display='flex';
+    replayInl.style.display='flex';
+    hintInl.style.display='flex';
+    playPlayerBtn.style.display='flex';
     setDuration(1);
   }
 
@@ -741,23 +840,28 @@ function startLevel(){
   setStatus(`Level ${S.level} — Get Ready!`);
   renderMelody('target-melody-display',S.targetMelody,true,true);
   renderMelody('player-melody-display',[]);
-  setTimeout(playTargetSequence,900);
+  setTimeout(()=>playTargetSequence(true),900);
 }
 
-async function playTargetSequence(){
+async function playTargetSequence(isAuto=false){
   S.isPlaying=true;
+  S.isAutoPlay=isAuto;  /* controls whether xylophone keys flash */
   setStatus('Listen closely… 👂');
   document.getElementById('keyboard').style.pointerEvents='none';
+  /* Visual feedback on the replay button when it's a manual replay */
+  const replayBtn=document.getElementById('btn-replay-inline');
+  if(replayBtn) replayBtn.classList.add('playing');
   renderMelody('target-melody-display',S.targetMelody,true,true);
   await sleep(400);
   for(let i=0;i<S.targetMelody.length;i++){
     if(!S.isPlaying||S.mode==='none') break;
     const item=S.targetMelody[i];
     playTone(item.note,item.duration,true);
-    flashKey(item.note);
     const beatMs=(60/S.bpm)*1000;
     await sleep(item.duration*beatMs+100);
   }
+  S.isAutoPlay=false;
+  if(replayBtn) replayBtn.classList.remove('playing');
   if(S.mode!=='none'){
     S.isPlaying=false;
     setStatus('Your turn! Build melody & submit.');
@@ -769,7 +873,41 @@ function replayTarget(){
   if(S.isPlaying) return;
   S.score=Math.max(0,S.score-5);
   refreshStats();
-  playTargetSequence();
+  playTargetSequence(false);   /* isAuto=false → no key flash */
+}
+
+async function playPlayerMelody(){
+  /* Play back whatever the user has built so far — no key flash, no state lock */
+  if(S.isPlaying||!S.playerMelody.length) return;
+  const btn=document.getElementById('btn-play-player');
+  if(btn) btn.classList.add('playing');
+  initAudio();
+  for(let i=0;i<S.playerMelody.length;i++){
+    const item=S.playerMelody[i];
+    /* play sound only — isTarget=true so normal flashKey path is skipped,
+       and isAutoPlay is false so the override doesn't fire either */
+    const d=NOTES[item.note]; if(!d) continue;
+    const osc=S.audioCtx.createOscillator(), g=S.audioCtx.createGain();
+    osc.type='sine'; osc.frequency.value=d.freq;
+    const beat=60/S.bpm, secs=item.duration*beat, now=S.audioCtx.currentTime;
+    g.gain.setValueAtTime(0,now);
+    g.gain.linearRampToValueAtTime(0.5,now+0.05);
+    g.gain.setTargetAtTime(0,now+secs,0.1);
+    osc.connect(g); g.connect(S.audioCtx.destination);
+    osc.start(); osc.stop(now+secs+0.4);
+    /* highlight the matching note block briefly */
+    const blocks=document.querySelectorAll('#player-melody-display .note-block');
+    if(blocks[i]){
+      blocks[i].style.transform='translateY(-4px) scale(1.1)';
+      blocks[i].style.filter='brightness(1.35)';
+      setTimeout(()=>{
+        blocks[i].style.transform='';
+        blocks[i].style.filter='';
+      }, Math.min(item.duration*(60/S.bpm)*1000, 400));
+    }
+    await sleep(item.duration*(60/S.bpm)*1000+80);
+  }
+  if(btn) btn.classList.remove('playing');
 }
 
 function giveHint(){
@@ -825,13 +963,14 @@ function onMistake(){
   const pd=document.getElementById('player-melody-display');
   pd.classList.add('shake');
   setTimeout(()=>pd.classList.remove('shake'),450);
-  S.lives--; S.streak=0; refreshStats();
-  if(S.lives<=0){ setTimeout(showGameOver,2500); return; }
+  if(S.maxLives!==999) S.lives--;
+  S.streak=0; refreshStats();
+  if(S.maxLives!==999&&S.lives<=0){ setTimeout(showGameOver,2500); return; }
   setTimeout(()=>{
     S.playerMelody=[];
     renderMelody('player-melody-display',[]);
     renderMelody('target-melody-display',S.targetMelody,true,true);
-    playTargetSequence();
+    playTargetSequence(false);
   },3000);
 }
 
@@ -850,7 +989,7 @@ function showGameOver(){ showModal('gameover'); }
 
 function advanceLevel(){
   S.level++;
-  if(S.level%3===0&&S.lives<3){ S.lives++; playSfx('win'); }
+  if(S.maxLives!==999&&S.level%3===0&&S.lives<S.maxLives){ S.lives++; playSfx('win'); }
   startLevel();
 }
 
