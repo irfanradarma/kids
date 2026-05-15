@@ -13,6 +13,7 @@
       --c2:#00cfb4; --c2g:rgba(0,207,180,0.28);
       --c3:#ffc43d; --c3g:rgba(255,196,61,0.28);
       --c4:#a78bfa; --c4g:rgba(167,139,250,0.28);
+      --c5:#22d3ee; --c5g:rgba(34,211,238,0.28);
       --spring:cubic-bezier(0.34,1.56,0.64,1);
       --ease:cubic-bezier(0.25,0.46,0.45,0.94);
     }
@@ -58,6 +59,7 @@
     .game-card:nth-child(2){--accent:var(--c2);--glow:var(--c2g);animation-delay:0.25s;}
     .game-card:nth-child(3){--accent:var(--c3);--glow:var(--c3g);animation-delay:0.35s;}
     .game-card:nth-child(4){--accent:var(--c4);--glow:var(--c4g);animation-delay:0.45s;}
+    .game-card:nth-child(5){--accent:var(--c5);--glow:var(--c5g);animation-delay:0.55s;}
     .game-card::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 28% 40%,var(--glow) 0%,transparent 60%);opacity:0;transition:opacity 0.35s;pointer-events:none;}
     .game-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 0.35s var(--spring);}
     @media(hover:hover){
@@ -80,7 +82,7 @@
     .card-go{width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.13);display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:background 0.22s,transform 0.22s var(--spring),color 0.22s;}
 
     /* teaser */
-    .teaser{margin-top:10px;width:100%;max-width:780px;padding:16px 20px;background:rgba(255,255,255,0.03);border:1.5px dashed rgba(255,255,255,0.11);border-radius:18px;display:flex;align-items:center;gap:12px;animation:cardUp 0.6s var(--spring) 0.58s both;}
+    .teaser{margin-top:10px;width:100%;max-width:780px;padding:16px 20px;background:rgba(255,255,255,0.03);border:1.5px dashed rgba(255,255,255,0.11);border-radius:18px;display:flex;align-items:center;gap:12px;animation:cardUp 0.6s var(--spring) 0.68s both;}
     .teaser-ico{font-size:2rem;}
     .teaser-txt{font-size:0.82rem;font-weight:600;color:var(--muted);line-height:1.55;}
     .teaser-txt strong{color:rgba(255,255,255,0.68);}
@@ -210,6 +212,19 @@
       </div>
     </div>
 
+    <div class="game-card" data-href="wordsmith.html" data-name="Wordsmith" data-emoji="📚" tabindex="0" role="button" aria-label="Main Wordsmith">
+      <div class="card-art"><div class="card-emoji-bg">📚</div></div>
+      <div class="card-body">
+        <div class="card-genre">Reading &amp; Language</div>
+        <div class="card-name">Wordsmith</div>
+        <div class="card-desc">Fix the broken words in fun story passages — fill the blanks or unscramble!</div>
+        <div class="card-footer">
+          <span class="card-badge">5 Stories</span>
+          <div class="card-go">→</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="teaser">
@@ -267,6 +282,7 @@ const GAMES = [
   {href:'gravity.html',   name:'Ball Drop',          emoji:'🌊'},
   {href:'flag.html',      name:'Flag Guess',         emoji:'🌎'},
   {href:'sudoku.html',    name:'Space Sudoku',       emoji:'🔢'},
+  {href:'wordsmith.html', name:'Wordsmith',          emoji:'📚'},
 ];
 
 /* ── STATS ── */

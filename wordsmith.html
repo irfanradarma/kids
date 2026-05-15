@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wordsmith – Kids Game Zone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════
+       DESIGN TOKENS  (match hub theme)
+    ═══════════════════════════════════════ */
+    :root {
+      --bg:      #070714;
+      --surface: #0f0f24;
+      --surface2:#14142e;
+      --border:  rgba(255,255,255,0.08);
+      --white:   #ffffff;
+      --muted:   rgba(255,255,255,0.45);
+
+      /* Wordsmith accent — bright cyan */
+      --accent:  #22d3ee;
+      --accentg: rgba(34,211,238,0.22);
+      --accentb: rgba(34,211,238,0.10);
+      --accent2: #f472b6;   /* pink — secondary highlight */
+      --accent2g:rgba(244,114,182,0.20);
+
+      --green:   #4ade80;
+      --red:     #f87171;
+      --yellow:  #fbbf24;
+      --orange:  #fb923c;
+
+      --spring: cubic-bezier(0.34,1.56,0.64,1);
+      --ease:   cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+
+    html, body {
+      width:100%; min-height:100%;
+      font-family:'Baloo 2', cursive;
+      background: var(--bg);
+      color: var(--white);
+      overflow-x:hidden;
+    }
+
+    /* ── COSMOS ── */
+    #cosmos { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+    .nebula { position:absolute; border-radius:50%; filter:blur(90px); opacity:0.14;
+               animation:nebFloat var(--nd,18s) ease-in-out infinite alternate; }
+    .neb1{width:600px;height:380px;background:#0e7490;top:-100px;left:-160px;--nd:21s;}
+    .neb2{width:450px;height:320px;background:#be185d;bottom:-80px;right:-110px;--nd:16s;}
+    .neb3{width:350px;height:260px;background:#22d3ee;top:40%;left:58%;--nd:24s;}
+    @keyframes nebFloat{from{transform:translate(0,0);}to{transform:translate(24px,16px);}}
+    .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite alternate;}
+    @keyframes twinkle{from{opacity:0.08;transform:scale(1);}to{opacity:0.9;transform:scale(1.6);}}
+
+    /* ── PAGE ── */
+    .page { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding-bottom:60px; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:10px 16px;
+      background:rgba(7,7,20,0.90); border-bottom:1.5px solid var(--border);
+      backdrop-filter:blur(14px); position:sticky; top:0; z-index:20;
+      gap:10px;
+    }
+    .home-btn {
+      display:flex; align-items:center; gap:7px;
+      padding:7px 16px 7px 10px;
+      background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.14);
+      border-radius:999px; color:var(--white);
+      font-family:'Baloo 2',cursive; font-size:0.9rem; font-weight:700;
+      cursor:pointer; text-decoration:none; white-space:nowrap;
+      transition:background .18s, border-color .18s, transform .15s;
+      flex-shrink:0;
+    }
+    .home-btn:hover{background:rgba(255,255,255,0.14);border-color:rgba(255,255,255,0.3);}
+    .home-btn:active{transform:scale(0.96);}
+
+    .game-title {
+      font-family:'Boogaloo',cursive; font-size:1.4rem; letter-spacing:.5px;
+      color:var(--white); text-shadow:0 0 24px var(--accentg);
+      flex:1; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .title-glow { color:var(--accent); }
+
+    /* stat chips row */
+    .stat-chips { display:flex; gap:7px; align-items:center; flex-shrink:0; }
+    .chip {
+      display:flex; flex-direction:column; align-items:center;
+      padding:4px 11px;
+      background:rgba(255,255,255,0.06); border:1.5px solid var(--border);
+      border-radius:12px; font-size:0.58rem; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted); line-height:1.2;
+    }
+    .chip-val { font-size:0.92rem; font-weight:800; color:var(--white); letter-spacing:0; }
+    .chip-val.cyan   { color:var(--accent); }
+    .chip-val.pink   { color:var(--accent2); }
+
+    /* ── MAIN CONTAINER ── */
+    .main-wrap {
+      width:100%; max-width:760px; padding:16px; margin:0 auto;
+      display:flex; flex-direction:column; gap:16px;
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background:var(--surface); border:1.5px solid var(--border);
+      border-radius:24px; padding:24px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    /* ══════════════════════════════════════
+       MENU SCREEN
+    ══════════════════════════════════════ */
+    .screen { display:none; }
+    .screen.active { display:flex; flex-direction:column; gap:16px; }
+
+    .menu-heading {
+      text-align:center;
+    }
+    .menu-heading h2 {
+      font-family:'Boogaloo',cursive; font-size:clamp(1.8rem,6vw,2.6rem);
+      color:var(--white); line-height:1;
+    }
+    .menu-heading p { margin-top:6px; font-size:.88rem; font-weight:600; color:var(--muted); }
+
+    /* mode grid */
+    .mode-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+    }
+    @media(max-width:420px){ .mode-grid{grid-template-columns:1fr;} }
+
+    .mode-card {
+      background:var(--surface2); border:2px solid var(--border);
+      border-radius:18px; padding:18px 14px; text-align:center;
+      cursor:pointer; transition:border-color .2s, transform .2s var(--spring), box-shadow .2s;
+    }
+    .mode-card:hover { border-color:var(--accent); transform:translateY(-4px); box-shadow:0 8px 24px var(--accentg); }
+    .mode-card.selected {
+      border-color:var(--accent); background:var(--accentb);
+      box-shadow:0 0 0 1px var(--accent), 0 8px 24px var(--accentg);
+    }
+    .mode-icon { font-size:2.4rem; margin-bottom:8px; }
+    .mode-name { font-family:'Boogaloo',cursive; font-size:1.1rem; color:var(--white); }
+    .mode-desc { font-size:.76rem; font-weight:600; color:var(--muted); margin-top:4px; line-height:1.45; }
+
+    /* difficulty row */
+    .section-label {
+      font-size:.68rem; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+      color:var(--muted); text-align:center; margin-bottom:8px;
+    }
+    .diff-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .diff-btn {
+      padding:9px 20px; border-radius:999px;
+      background:var(--surface2); border:1.5px solid var(--border);
+      color:var(--muted); font-family:'Boogaloo',cursive; font-size:1rem;
+      cursor:pointer; transition:all .18s;
+    }
+    .diff-btn:hover { border-color:var(--accent); color:var(--white); }
+    .diff-btn.selected {
+      background:var(--accent); border-color:var(--accent); color:#000;
+      font-weight:700; box-shadow:0 4px 0 rgba(0,0,0,0.4);
+    }
+
+    /* start btn */
+    .start-btn {
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      width:100%; padding:16px; border-radius:18px;
+      background:var(--accent); color:#000;
+      font-family:'Boogaloo',cursive; font-size:1.3rem; letter-spacing:.5px;
+      cursor:pointer; border:none;
+      box-shadow:0 6px 0 rgba(0,0,0,0.4), 0 0 32px var(--accentg);
+      transition:transform .12s var(--spring), box-shadow .12s;
+    }
+    .start-btn:hover  { transform:translateY(-3px); box-shadow:0 9px 0 rgba(0,0,0,0.4), 0 0 40px var(--accentg); }
+    .start-btn:active { transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,0.4); }
+
+    /* ══════════════════════════════════════
+       GAME SCREEN
+    ══════════════════════════════════════ */
+    .game-top-row {
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .passage-title {
+      font-family:'Boogaloo',cursive; font-size:1.3rem; color:var(--accent2);
+      letter-spacing:.5px; line-height:1;
+    }
+    .game-actions { display:flex; gap:8px; flex-shrink:0; }
+    .icon-btn {
+      width:42px; height:42px; border-radius:14px;
+      background:var(--surface2); border:1.5px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; cursor:pointer;
+      transition:background .18s, border-color .18s, transform .15s;
+    }
+    .icon-btn:hover  { background:var(--accentb); border-color:var(--accent); }
+    .icon-btn:active { transform:scale(0.93); }
+    .icon-btn.hint-btn { border-color:rgba(251,191,36,0.3); }
+    .icon-btn.hint-btn:hover { background:rgba(251,191,36,0.12); border-color:var(--yellow); }
+
+    /* progress bar */
+    .prog-wrap {
+      width:100%; height:10px; background:rgba(255,255,255,0.06);
+      border-radius:99px; overflow:hidden; border:1px solid var(--border);
+    }
+    .prog-fill {
+      height:100%; width:0%;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius:99px; transition:width .35s var(--ease);
+    }
+    .prog-label {
+      font-size:.72rem; font-weight:700; color:var(--muted);
+      text-align:right; margin-top:5px; letter-spacing:.5px;
+    }
+
+    /* passage text */
+    .passage-box {
+      font-size:clamp(1.05rem,3vw,1.35rem); line-height:2.2;
+      padding:4px 0; color:rgba(255,255,255,0.88);
+    }
+
+    /* word tokens */
+    .word-token { display:inline; }
+
+    /* target word (broken) */
+    .target-word {
+      display:inline-block; cursor:pointer;
+      background:rgba(251,191,36,0.14); color:var(--yellow);
+      border-bottom:3px dashed var(--yellow);
+      border-radius:6px; padding:0 6px;
+      font-weight:800;
+      transition:background .15s, transform .15s var(--spring);
+    }
+    .target-word:hover { background:rgba(251,191,36,0.26); transform:scale(1.06); }
+
+    /* solved word */
+    .solved-word {
+      display:inline-block; color:var(--green); font-weight:800;
+      animation:wordPop .4s var(--spring);
+      text-shadow:0 0 12px rgba(74,222,128,0.45);
+    }
+    @keyframes wordPop {
+      0%{transform:scale(1);}
+      50%{transform:scale(1.28) rotate(-4deg);}
+      100%{transform:scale(1) rotate(0);}
+    }
+
+    /* inline input */
+    .word-input-wrap { display:inline-block; position:relative; }
+    .word-input {
+      font-family:'Baloo 2',cursive; font-weight:800; font-size:inherit;
+      color:var(--accent); background:var(--surface2);
+      border:2px solid var(--accent); border-radius:10px;
+      padding:2px 10px; text-align:center; outline:none;
+      box-shadow:0 0 14px var(--accentg);
+      -webkit-user-select:text; user-select:text;
+    }
+    .word-input.shake { animation:inputShake .4s ease; }
+    @keyframes inputShake {
+      0%,100%{transform:translateX(0);border-color:var(--red);}
+      25%{transform:translateX(-6px);border-color:var(--red);}
+      75%{transform:translateX(6px);border-color:var(--red);}
+    }
+
+    /* floating score */
+    .float-score {
+      position:fixed; pointer-events:none; z-index:999;
+      font-family:'Boogaloo',cursive; font-size:1.4rem; color:var(--green);
+      text-shadow:0 2px 8px rgba(0,0,0,0.6);
+      animation:floatUp .9s var(--ease) forwards;
+    }
+    @keyframes floatUp {
+      0%  { opacity:1; transform:translateY(0) scale(1); }
+      100%{ opacity:0; transform:translateY(-44px) scale(1.18); }
+    }
+
+    /* ══════════════════════════════════════
+       END SCREEN
+    ══════════════════════════════════════ */
+    .end-panel { text-align:center; }
+    .end-title {
+      font-family:'Boogaloo',cursive; font-size:clamp(2rem,8vw,3rem);
+      color:var(--white); line-height:1; margin-bottom:4px;
+    }
+    .end-subtitle { font-size:.9rem; font-weight:600; color:var(--muted); margin-bottom:20px; }
+    .stars-row {
+      display:flex; justify-content:center; gap:12px;
+      font-size:3.2rem; margin:16px 0; color:rgba(255,255,255,0.12);
+    }
+    .star-el.earned {
+      color:var(--yellow);
+      text-shadow:0 0 20px rgba(251,191,36,0.55);
+      animation:wordPop .5s var(--spring) both;
+    }
+    .end-stats {
+      display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin:16px 0;
+    }
+    .end-stat {
+      padding:10px 20px; background:var(--surface2);
+      border:1.5px solid var(--border); border-radius:16px;
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+    }
+    .end-stat-val { font-family:'Boogaloo',cursive; font-size:1.6rem; color:var(--white); }
+    .end-stat-lbl { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
+    .end-btns { display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+
+    /* shared action button */
+    .act-btn {
+      display:flex; align-items:center; gap:8px;
+      padding:13px 24px; border-radius:16px;
+      font-family:'Boogaloo',cursive; font-size:1.05rem; letter-spacing:.5px;
+      cursor:pointer; border:none; color:var(--white);
+      box-shadow:0 5px 0 rgba(0,0,0,0.4);
+      transition:transform .12s var(--spring), box-shadow .12s;
+    }
+    .act-btn:hover  { transform:translateY(-3px); box-shadow:0 8px 0 rgba(0,0,0,0.4); }
+    .act-btn:active { transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,0.4); }
+    .act-btn.primary   { background:var(--accent); color:#000; }
+    .act-btn.secondary { background:var(--accent2); }
+  </style>
+</head>
+<body>
+
+<!-- COSMOS -->
+<div id="cosmos">
+  <div class="nebula neb1"></div>
+  <div class="nebula neb2"></div>
+  <div class="nebula neb3"></div>
+</div>
+
+<div class="page">
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <a class="home-btn" href="README.md" title="Back to Game Library">
+      <span>🪐</span> Game Zone
+    </a>
+    <span class="game-title">WORD<span class="title-glow">SMITH</span></span>
+    <div class="stat-chips">
+      <div class="chip">
+        <span class="chip-val cyan" id="ui-score">0</span>
+        <span>Score</span>
+      </div>
+      <div class="chip">
+        <span class="chip-val pink" id="ui-streak">0</span>
+        <span>Streak</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+
+    <!-- ═══ MENU SCREEN ═══ -->
+    <div id="screen-menu" class="screen active">
+
+      <div class="panel menu-heading">
+        <h2>📚 Ready to Play?</h2>
+        <p>Fix the broken words in the passage and level up!</p>
+      </div>
+
+      <!-- Mode cards -->
+      <div class="panel" style="padding:20px;">
+        <div class="section-label">Choose Game Mode</div>
+        <div class="mode-grid">
+          <div class="mode-card selected" data-mode="fill">
+            <div class="mode-icon">📝</div>
+            <div class="mode-name">Fill the Blank</div>
+            <div class="mode-desc">Find the missing letters and fix the broken words!</div>
+          </div>
+          <div class="mode-card" data-mode="anagram">
+            <div class="mode-icon">🕵️</div>
+            <div class="mode-name">Hidden Anagram</div>
+            <div class="mode-desc">Some words have their letters mixed up. Can you spot them?</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Difficulty -->
+      <div class="panel" style="padding:18px 20px;">
+        <div class="section-label">Difficulty</div>
+        <div class="diff-row">
+          <button class="diff-btn selected" data-diff="easy">Easy ⭐</button>
+          <button class="diff-btn" data-diff="medium">Medium ⭐⭐</button>
+          <button class="diff-btn" data-diff="hard">Hard ⭐⭐⭐</button>
+        </div>
+      </div>
+
+      <button class="start-btn" id="btn-start">Play Now! 🚀</button>
+
+    </div><!-- /screen-menu -->
+
+
+    <!-- ═══ GAME SCREEN ═══ -->
+    <div id="screen-game" class="screen">
+
+      <div class="panel">
+        <!-- Title row -->
+        <div class="game-top-row" style="margin-bottom:14px;">
+          <span class="passage-title" id="game-title">Passage Title</span>
+          <div class="game-actions">
+            <div class="icon-btn hint-btn" id="btn-hint" title="Use a hint">💡</div>
+            <div class="icon-btn" id="btn-quit" title="Quit to menu">✖</div>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="prog-wrap"><div class="prog-fill" id="game-progress"></div></div>
+        <div class="prog-label" id="progress-text">Fixed: 0 / 0</div>
+
+        <!-- Passage -->
+        <div class="passage-box" id="passage-container"></div>
+      </div>
+
+    </div><!-- /screen-game -->
+
+
+    <!-- ═══ END SCREEN ═══ -->
+    <div id="screen-end" class="screen">
+      <div class="panel end-panel">
+
+        <div class="end-title" id="end-heading">Great Job! 🎉</div>
+        <div class="end-subtitle">Passage complete!</div>
+
+        <div class="stars-row" id="end-stars">
+          <span class="star-el">★</span>
+          <span class="star-el">★</span>
+          <span class="star-el">★</span>
+        </div>
+
+        <div class="end-stats">
+          <div class="end-stat">
+            <span class="end-stat-val" id="end-score">0</span>
+            <span class="end-stat-lbl">Score</span>
+          </div>
+          <div class="end-stat">
+            <span class="end-stat-val" id="end-accuracy">100%</span>
+            <span class="end-stat-lbl">Accuracy</span>
+          </div>
+        </div>
+
+        <div class="end-btns">
+          <button class="act-btn secondary" id="btn-menu">🏠 Menu</button>
+          <button class="act-btn primary"   id="btn-next">Next Level →</button>
+        </div>
+
+      </div>
+    </div><!-- /screen-end -->
+
+  </div><!-- .main-wrap -->
+</div><!-- .page -->
+
+<script>
+/* ══ COSMOS STARS ══ */
+(function(){
+  const c=document.getElementById('cosmos');
+  const n=window.innerWidth>900?160:80;
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2.2+0.3;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3.5+1.5).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s`;
+    c.appendChild(s);
+  }
+})();
+
+/* ══ PASSAGES DATA ══ */
+const PASSAGES = [
+  {
+    id:1, title:"The Magic Forest",
+    text:"Luna walked through the quiet forest. She found a glowing butterfly resting near the river. The butterfly fluttered its wings and flew into the bright blue sky."
+  },
+  {
+    id:2, title:"Space Journey",
+    text:"The brave astronauts carefully repaired the communication antenna on the outside of their spaceship. They had to finish before the dangerous solar storm arrived."
+  },
+  {
+    id:3, title:"The Missing Cake",
+    text:"Tommy looked everywhere for his birthday cake. He checked under the table and behind the sofa. Finally, he saw his little dog eating chocolate frosting in the kitchen!"
+  },
+  {
+    id:4, title:"Deep Sea Explorer",
+    text:"Far beneath the ocean waves, the submarine turned on its brilliant headlights. A giant squid swam past the window, leaving a cloud of dark ink in the water."
+  },
+  {
+    id:5, title:"The Friendly Dragon",
+    text:"High in the mountains lived a green dragon named Sparks. Unlike other dragons, Sparks did not like breathing fire. He preferred to bake warm chocolate cookies for his friends."
+  },
+  {
+    id:6,
+    title:"Wonderland Rabbit",
+    text:"Alice followed a hurried white rabbit into a strange underground world. She discovered talking animals, magical cakes, and a queen who loved shouting at everyone."
+    },
+    {
+    id:7,
+    title:"Treasure Island Map",
+    text:"Jim carefully unfolded the old treasure map he found inside the pirate chest. The faded paper showed a secret island hidden far across the dangerous sea."
+    },
+    {
+    id:8,
+    title:"Sherlock's Clue",
+    text:"Sherlock Holmes examined the muddy footprints near the fireplace. With careful observation, he solved the mysterious disappearance before the evening ended."
+    },
+    {
+    id:9,
+    title:"The Jungle Boy",
+    text:"Mowgli ran through the jungle beside his animal friends. Baloo the bear taught him about the forest while Bagheera watched from the shadows."
+    },
+    {
+    id:10,
+    title:"Secret Garden Gate",
+    text:"Mary pushed open the rusty garden gate hidden behind the ivy wall. Inside, colorful flowers bloomed beneath the warm sunlight."
+    },
+    {
+    id:11,
+    title:"Giant Peach Adventure",
+    text:"James climbed inside the enormous peach and met a group of unusual insect friends. Together they floated across the ocean toward an exciting new future."
+    },
+    {
+    id:12,
+    title:"The Little Prince",
+    text:"The young prince traveled from planet to planet searching for friendship and wisdom. He cared deeply for the delicate rose growing on his tiny world."
+    },
+    {
+    id:13,
+    title:"Robin Hood Forest",
+    text:"Robin Hood hid among the tall trees of Sherwood Forest. He shared food and gold with poor villagers who needed help."
+    },
+    {
+    id:14,
+    title:"Captain Nemo",
+    text:"Deep beneath the crashing waves, Captain Nemo guided his submarine through glowing underwater caves filled with strange sea creatures."
+    },
+    {
+    id:15,
+    title:"Oliver's Wish",
+    text:"Oliver wandered through the crowded streets hoping to find kindness and safety. A friendly stranger finally offered him a warm meal and shelter."
+    },
+    {
+    id:16,
+    title:"Peter's Flight",
+    text:"Peter Pan flew above the rooftops with Wendy and her brothers. Together they traveled toward the magical island where children never grew older."
+    },
+    {
+    id:17,
+    title:"Narnia Lantern",
+    text:"Lucy stepped through the wardrobe and discovered a snowy forest lit by a glowing lantern. A gentle faun greeted her beside the path."
+    },
+    {
+    id:18,
+    title:"Pinocchio Learns",
+    text:"Pinocchio wanted to become a real boy, but he first needed to learn honesty and responsibility through many difficult adventures."
+    },
+    {
+    id:19,
+    title:"Heidi in the Alps",
+    text:"Heidi skipped happily across the green mountain fields while goats grazed nearby. Fresh air and sunshine filled the peaceful valley."
+    },
+    {
+    id:20,
+    title:"The Time Machine",
+    text:"The inventor pulled the shining lever and watched the world race through time around him. Cities changed as centuries passed in moments."
+    },
+    {
+    id:21,
+    title:"Gulliver's Voyage",
+    text:"After the storm ended, Gulliver awoke on a strange island where tiny people carefully tied him to the ground with ropes."
+    },
+    {
+    id:22,
+    title:"Black Beauty",
+    text:"The gentle horse carried travelers along the countryside roads. Black Beauty hoped every animal would be treated with kindness and care."
+    },
+    {
+    id:23,
+    title:"Tom Sawyer Fence",
+    text:"Tom convinced his friends to paint the long wooden fence for him. Soon everyone competed for a chance to help with the chore."
+    },
+    {
+    id:24,
+    title:"Huck on the River",
+    text:"Huck Finn floated quietly down the wide river on a small raft. The water shimmered beneath the bright moonlight."
+    },
+    {
+    id:25,
+    title:"Dracula's Castle",
+    text:"A traveler approached the dark castle standing high above the cliffs. Strange shadows moved silently behind the tall windows."
+    },
+    {
+    id:26,
+    title:"Frankenstein's Experiment",
+    text:"The scientist worked late into the stormy night assembling his unusual experiment. Lightning flashed brightly outside the laboratory windows."
+    },
+    {
+    id:27,
+    title:"Odysseus at Sea",
+    text:"Odysseus sailed across dangerous waters while searching for a way home. Giant waves crashed against the wooden ship."
+    },
+    {
+    id:28,
+    title:"Achilles the Warrior",
+    text:"Achilles raced across the battlefield with incredible speed and courage. Soldiers admired his strength during the fierce conflict."
+    },
+    {
+    id:29,
+    title:"Arabian Lamp",
+    text:"Aladdin rubbed the dusty lamp and watched a magical genie appear in swirling blue smoke. The genie promised to grant powerful wishes."
+    },
+    {
+    id:30,
+    title:"Sinbad's Journey",
+    text:"Sinbad sailed beyond distant islands filled with giant birds and mysterious treasures hidden inside dark caves."
+    },
+    {
+    id:31,
+    title:"Rapunzel's Tower",
+    text:"Rapunzel looked down from the tall tower window while brushing her incredibly long golden hair."
+    },
+    {
+    id:32,
+    title:"Snow White Forest",
+    text:"Snow White hurried through the quiet forest until she discovered a tiny cottage belonging to seven hardworking dwarfs."
+    },
+    {
+    id:33,
+    title:"Sleeping Castle",
+    text:"The castle remained silent for many years while thorny vines covered the ancient stone walls."
+    },
+    {
+    id:34,
+    title:"Beauty and the Beast",
+    text:"Belle explored the enormous library inside the mysterious castle while the lonely Beast watched quietly nearby."
+    },
+    {
+    id:35,
+    title:"Cinderella's Ball",
+    text:"Cinderella stepped carefully into the grand ballroom wearing sparkling glass slippers and a beautiful silver gown."
+    },
+    {
+    id:36,
+    title:"The Tin Soldier",
+    text:"The brave little tin soldier stood proudly on one leg while guarding the nursery room during the night."
+    },
+    {
+    id:37,
+    title:"Ugly Duckling Pond",
+    text:"The lonely duckling swam quietly across the pond until one spring morning he saw his reflection as a graceful swan."
+    },
+    {
+    id:38,
+    title:"Emperor's Clothes",
+    text:"The emperor proudly marched through the city while the crowd whispered nervously about his unusual invisible outfit."
+    },
+    {
+    id:39,
+    title:"Frog Prince",
+    text:"The princess dropped her golden ball into the deep pond where a talking frog offered to help retrieve it."
+    },
+    {
+    id:40,
+    title:"Pied Piper Tune",
+    text:"The mysterious musician played a cheerful melody on his pipe while hundreds of rats followed him through the streets."
+    },
+    {
+    id:41,
+    title:"Jack's Beanstalk",
+    text:"Jack climbed the enormous beanstalk rising high above the clouds toward the giant's magical castle."
+    },
+    {
+    id:42,
+    title:"Three Musketeers",
+    text:"The young swordsman joined three loyal musketeers who protected the kingdom with bravery and friendship."
+    },
+    {
+    id:43,
+    title:"Monte Cristo Escape",
+    text:"After years inside the prison fortress, the clever prisoner finally escaped beneath the cover of darkness."
+    },
+    {
+    id:44,
+    title:"Don Quixote's Windmill",
+    text:"Don Quixote charged toward the spinning windmills believing they were enormous giants threatening the countryside."
+    },
+    {
+    id:45,
+    title:"Moby Dick Chase",
+    text:"The captain stared across the freezing ocean searching for the giant white whale that escaped him many times before."
+    },
+    {
+    id:46,
+    title:"Around the World",
+    text:"The traveler hurried from trains to steamships while racing to complete a journey around the entire world in eighty days."
+    },
+    {
+    id:47,
+    title:"Anne at Green Gables",
+    text:"Anne talked excitedly while walking through fields of flowers near the cheerful farmhouse at Green Gables."
+    },
+    {
+    id:48,
+    title:"Pollyanna's Smile",
+    text:"Pollyanna encouraged everyone to find something happy even during difficult moments in their lives."
+    },
+    {
+    id:49,
+    title:"Winnie the Pooh",
+    text:"Pooh Bear wandered through the forest searching for honey while his friends prepared a surprise picnic nearby."
+    },
+    {
+    id:50,
+    title:"Charlotte's Web",
+    text:"Charlotte carefully spun words into her beautiful web to help her friend Wilbur become famous around the farm."
+    },
+    {
+    id:51,
+    title:"The Hobbit Journey",
+    text:"Bilbo packed his belongings and followed the dwarves toward the lonely mountain guarded by a sleeping dragon."
+    },
+    {
+    id:52,
+    title:"Frodo's Ring",
+    text:"Frodo carried the powerful ring across dangerous lands while loyal friends protected him from shadowy enemies."
+    },
+    {
+    id:53,
+    title:"Percy at Camp",
+    text:"Percy discovered a hidden camp where young heroes trained to battle ancient monsters from mythology."
+    },
+    {
+    id:54,
+    title:"Matilda Reads",
+    text:"Matilda spent long afternoons reading enormous library books while secretly developing extraordinary abilities."
+    },
+    {
+    id:55,
+    title:"Charlie and Chocolate",
+    text:"Charlie entered the magnificent chocolate factory filled with rivers of candy and incredible inventions made of sweets."
+    },
+    {
+    id:56,
+    title:"Alice in Wonderland",
+    text:"Alice sat beside her sister near the riverbank when she noticed a white rabbit wearing a tiny coat and carrying a pocket watch. Curious and excited, she followed the rabbit down a deep tunnel that led into a strange underground world filled with talking animals, magical food, and confusing riddles. Everywhere she looked, the world seemed to change shape and size, making her wonder whether she was dreaming or awake."
+    },
+    {
+    id:57,
+    title:"Treasure Island",
+    text:"Jim Hawkins carefully unfolded the old treasure map he discovered inside a pirate captain's chest at the inn. The faded paper revealed secret paths, hidden caves, and the location of buried gold somewhere across the sea. As the ship sailed toward the mysterious island, Jim realized that some of the sailors were dangerous pirates secretly planning a mutiny."
+    },
+    {
+    id:58,
+    title:"The Secret Garden",
+    text:"After arriving at her uncle's large and lonely mansion, Mary Lennox spent many days wandering through silent hallways and empty gardens. One afternoon, she discovered a hidden wooden door covered by thick ivy vines. Behind the door was a forgotten garden filled with sleeping flowers and tangled plants waiting to bloom again under the warmth of spring."
+    },
+    {
+    id:59,
+    title:"The Jungle Book",
+    text:"Mowgli had grown up among the animals of the jungle ever since he was rescued as a baby by a pack of wolves. Baloo the bear taught him the laws of the forest while Bagheera the panther protected him from danger. Although Mowgli loved the jungle deeply, he often wondered whether he truly belonged among animals or humans."
+    },
+    {
+    id:60,
+    title:"Peter Pan",
+    text:"Late one evening, Peter Pan flew through the nursery window and invited Wendy and her brothers to travel with him to Neverland. They soared above rooftops, clouds, and oceans before reaching an island filled with pirates, mermaids, and lost children. In Neverland, adventures waited around every corner, and growing up seemed very far away."
+    },
+    {
+    id:61,
+    title:"The Chronicles of Narnia",
+    text:"While hiding inside an old wardrobe during a game, Lucy suddenly stepped into a snowy forest where snowflakes drifted gently through the air. She met a friendly faun carrying packages beneath a glowing lantern in the middle of the woods. As Lucy explored further, she learned that the magical land of Narnia had been trapped in endless winter by a cruel queen."
+    },
+    {
+    id:62,
+    title:"The Hobbit",
+    text:"Bilbo Baggins enjoyed a peaceful and predictable life inside his comfortable hobbit hole until a wizard named Gandalf arrived with thirteen dwarves seeking help. Reluctantly, Bilbo joined their dangerous journey across mountains, forests, and dark caves to reclaim a treasure guarded by a fierce dragon. Along the way, Bilbo discovered courage and cleverness he never knew he possessed."
+    },
+    {
+    id:63,
+    title:"Charlotte's Web",
+    text:"Wilbur the pig was smaller than the other animals on the farm and often worried about what would happen to him as he grew older. Fortunately, he became friends with Charlotte, a wise spider living in the barn doorway. To save Wilbur, Charlotte spun beautiful words into her web, causing the humans to believe Wilbur was truly special."
+    },
+    {
+    id:64,
+    title:"Anne of Green Gables",
+    text:"Anne Shirley arrived at Green Gables by mistake, but her bright imagination and endless curiosity quickly changed life on the farm. She talked excitedly about forests, lakes, and clouds while finding beauty in ordinary places. Although Anne often made mistakes because of her impulsive nature, her kindness and determination slowly won the hearts of everyone around her."
+    },
+    {
+    id:65,
+    title:"The Little Prince",
+    text:"A pilot stranded in the desert met a mysterious young prince who spoke about his travels between tiny planets scattered across the universe. The prince described meeting unusual adults who cared too much about numbers, power, and possessions. More than anything else, the prince missed the delicate rose he had left behind on his small home planet."
+    },
+    {
+    id:66,
+    title:"Robin Hood",
+    text:"Deep within Sherwood Forest, Robin Hood and his loyal friends secretly helped poor villagers suffering under unfair rulers. Skilled with a bow and quick with clever plans, Robin often outsmarted the sheriff's guards before disappearing among the trees. Although the authorities considered him an outlaw, many ordinary people saw Robin as a hero."
+    },
+    {
+    id:67,
+    title:"Oliver Twist",
+    text:"Young Oliver Twist wandered through the crowded streets of London searching for kindness, food, and safety after escaping a harsh orphanage. Along the way, he encountered both generous strangers and dangerous criminals who tried to use him for theft. Despite many hardships, Oliver remained honest and hopeful about finding a better future."
+    },
+    {
+    id:68,
+    title:"Black Beauty",
+    text:"Black Beauty remembered the peaceful green fields where he spent his younger days before being sold to different owners throughout the city. Some people treated horses with patience and care, while others worked them harshly without rest. Through every difficult experience, Black Beauty hoped humans would learn to show kindness toward animals."
+    },
+    {
+    id:69,
+    title:"Twenty Thousand Leagues Under the Sea",
+    text:"Professor Aronnax boarded a mysterious submarine commanded by the brilliant but secretive Captain Nemo. Together they traveled beneath giant ocean waves, exploring underwater forests, coral reefs, and hidden shipwrecks resting on the seafloor. Although the underwater world was breathtakingly beautiful, Captain Nemo carried deep sadness and anger within his heart."
+    },
+    {
+    id:70,
+    title:"Around the World in Eighty Days",
+    text:"Phileas Fogg confidently accepted a challenge to travel around the entire world in only eighty days using trains, steamships, and other transportation. Accompanied by his loyal servant Passepartout, he faced storms, delays, and unexpected obstacles in many different countries. Despite every difficulty, Fogg remained calm and determined to complete the journey on time."
+    },
+    {
+    id:71,
+    title:"Don Quixote",
+    text:"After reading too many stories about knights and heroic adventures, Don Quixote decided to become a wandering knight himself. Riding across the countryside with his faithful companion Sancho Panza, he imagined ordinary windmills were dangerous giants threatening innocent people. Although many laughed at his strange behavior, Don Quixote never stopped believing in bravery and honor."
+    },
+    {
+    id:72,
+    title:"Heidi",
+    text:"Heidi loved living high in the mountains with her grandfather, where she could run freely through green meadows filled with flowers and grazing goats. Every morning she climbed the hills while enjoying the fresh air and warm sunshine. Her cheerful personality brought happiness not only to her grandfather but also to everyone she met."
+    },
+    {
+    id:73,
+    title:"Pinocchio",
+    text:"Geppetto carved a wooden puppet named Pinocchio and wished more than anything that the puppet could become a real boy. However, Pinocchio often made poor decisions because he listened too easily to dishonest strangers. Through many adventures and mistakes, he slowly learned the importance of honesty, courage, and responsibility."
+    },
+    {
+    id:74,
+    title:"Tom Sawyer",
+    text:"Tom Sawyer preferred adventure and excitement over schoolwork or chores, especially during warm summer afternoons beside the river. One day, he cleverly convinced his friends to paint a long wooden fence for him while pretending the task was enjoyable. Although Tom frequently caused trouble, his imagination and bravery often helped him during difficult situations."
+    },
+    {
+    id:75,
+    title:"The Odyssey",
+    text:"After the great war ended, Odysseus began a long and dangerous journey across the sea to return home to his family. During his travels, he faced powerful storms, giant monsters, and magical islands filled with temptation. Even after many years away, Odysseus never stopped hoping to see his homeland again."
+    },
+    {
+    id:76,
+    title:"A Christmas Carol",
+    text:"Ebenezer Scrooge cared only about money and treated everyone around him with coldness and impatience. On Christmas Eve, mysterious spirits showed him scenes from his past, present, and future that revealed the consequences of his selfish behavior. By morning, Scrooge realized that kindness and generosity brought far greater happiness than wealth alone."
+    },
+    {
+    id:77,
+    title:"The Wind in the Willows",
+    text:"Mole left his underground home one spring morning and discovered the peaceful beauty of the riverbank beside his new friend Rat. Together they enjoyed picnics, boating, and long conversations while exploring the countryside. Their quiet lives often became chaotic whenever the reckless Mr. Toad chased another dangerous adventure."
+    },
+    {
+    id:78,
+    title:"The Adventures of Sherlock Holmes",
+    text:"Sherlock Holmes carefully examined every detail inside the mysterious room, from muddy footprints near the fireplace to tiny scratches on the window frame. While other people overlooked small clues, Holmes used observation and logic to uncover the truth behind difficult cases. His loyal friend Dr. Watson watched with amazement as each mystery was solved."
+    },
+    {
+    id:79,
+    title:"Moby Dick",
+    text:"Captain Ahab stood at the front of the ship staring across the cold gray ocean while searching for the enormous white whale called Moby Dick. His determination to find the whale became stronger with every storm and passing wave. As the dangerous voyage continued, the crew began to fear the captain's growing obsession."
+    },
+    {
+    id:80,
+    title:"The Wizard of Oz",
+    text:"After a powerful tornado carried Dorothy far from her home in Kansas, she landed in the magical Land of Oz surrounded by strange new friends and colorful landscapes. Together with a scarecrow, a tin woodman, and a cowardly lion, she followed the yellow brick road toward the Emerald City. Each companion hoped the Wizard could grant their deepest wish."
+    }
+];
+
+/* ══ APP STATE ══ */
+const App = {
+  mode:'fill', difficulty:'easy',
+  score:0, streak:0,
+  tokens:[], currentPassage:null,
+  targetsSolved:0, totalTargets:0,
+  mistakes:0, hintsUsed:0,
+  playedIds:[]
+};
+
+/* ══ DOM ══ */
+const $ = id => document.getElementById(id);
+const scoreEl    = $('ui-score');
+const streakEl   = $('ui-streak');
+const passageEl  = $('passage-container');
+const progFill   = $('game-progress');
+const progLabel  = $('progress-text');
+const gameTitleEl= $('game-title');
+
+const screens = {
+  menu: $('screen-menu'),
+  game: $('screen-game'),
+  end:  $('screen-end')
+};
+
+/* ══ AUDIO ══ */
+const Audio = {
+  ctx:null,
+  init(){ if(!this.ctx) this.ctx=new(window.AudioContext||window.webkitAudioContext)(); if(this.ctx.state==='suspended') this.ctx.resume(); },
+  tone(freq,type,dur,vol=0.08){
+    this.init();
+    const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.00001,this.ctx.currentTime+dur);
+    o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+dur);
+  },
+  success(){ this.tone(600,'sine',.1); setTimeout(()=>this.tone(900,'sine',.18),100); },
+  error()  { this.tone(180,'square',.3,.05); },
+  win()    { [523,659,783,1046].forEach((f,i)=>setTimeout(()=>this.tone(f,'sine',.2),i*150)); },
+  click()  { this.tone(440,'triangle',.1,.05); }
+};
+
+/* ══ SCREENS ══ */
+function show(name){
+  Object.values(screens).forEach(s=>{ s.classList.remove('active'); });
+  screens[name].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ══ UI UPDATE ══ */
+function refreshStats(){
+  scoreEl.textContent  = App.score;
+  streakEl.textContent = App.streak;
+}
+
+/* ══ MENU SETUP ══ */
+document.querySelectorAll('.mode-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    Audio.click();
+    document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+    App.mode = card.dataset.mode;
+  });
+});
+document.querySelectorAll('.diff-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    Audio.click();
+    document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    App.difficulty = btn.dataset.diff;
+  });
+});
+$('btn-start').addEventListener('click', startGame);
+$('btn-quit').addEventListener('click',  ()=>show('menu'));
+$('btn-menu').addEventListener('click',  ()=>show('menu'));
+$('btn-next').addEventListener('click',  startGame);
+$('btn-hint').addEventListener('click',  giveHint);
+
+/* ══ GAME ENGINE ══ */
+function pickPassage(){
+  let pool = PASSAGES.filter(p=>!App.playedIds.includes(p.id));
+  if(!pool.length){ App.playedIds=[]; pool=PASSAGES; }
+  const p = pool[Math.floor(Math.random()*pool.length)];
+  App.playedIds.push(p.id);
+  return p;
+}
+
+function tokenize(text){
+  const STOP = new Set(['a','an','the','is','are','was','were','and','or','to','in','on','at','of','it','he','she','we','its']);
+  const re = /([a-zA-Z']+)|([^a-zA-Z']+)/g;
+  let m, id=0, tokens=[];
+  while((m=re.exec(text))!==null){
+    const str=m[0], isW=/[a-zA-Z]/.test(str);
+    tokens.push({
+      id:id++, original:str, display:str,
+      isWord:isW,
+      isEligible: isW && str.length>=4 && !STOP.has(str.toLowerCase()),
+      isTarget:false, isSolved:false
+    });
+  }
+  return tokens;
+}
+
+function maskWord(word,diff){
+  const arr=word.split('');
+  // always keep index 0; pick indices to blank
+  const pool=[];
+  for(let i=1;i<arr.length;i++) pool.push(i);
+  pool.sort(()=>Math.random()-.5);
+  const count = diff==='easy'?1 : diff==='medium'?Math.ceil(word.length/2) : word.length-1;
+  pool.slice(0,count).forEach(i=>{ arr[i]='_'; });
+  return arr.join('');
+}
+
+function scramble(word,diff){
+  if(word.length<=3) return word;
+  if(diff==='hard'){
+    const a=word.split(''); let tries=0;
+    while(a.join('')===word&&tries<12){ a.sort(()=>Math.random()-.5); tries++; }
+    return a.join('');
+  }
+  const first=word[0], last=word[word.length-1];
+  const inner=word.slice(1,-1).split(''); let tries=0;
+  const orig=inner.join('');
+  while(inner.join('')===orig&&tries<12){ inner.sort(()=>Math.random()-.5); tries++; }
+  return first+inner.join('')+last;
+}
+
+function startGame(){
+  Audio.init(); Audio.click();
+  App.targetsSolved=0; App.mistakes=0; App.hintsUsed=0;
+  App.currentPassage = pickPassage();
+  gameTitleEl.textContent = App.currentPassage.title;
+  App.tokens = tokenize(App.currentPassage.text);
+
+  // pick targets
+  let elig = App.tokens.filter(t=>t.isEligible).sort(()=>Math.random()-.5);
+  const pct = App.difficulty==='easy'?.20 : App.difficulty==='medium'?.40 : .60;
+  const count = Math.min(Math.max(2,Math.floor(elig.length*pct)), elig.length);
+  App.totalTargets = count;
+
+  for(let i=0;i<count;i++){
+    const t=elig[i]; t.isTarget=true;
+    t.display = App.mode==='fill' ? maskWord(t.original,App.difficulty) : scramble(t.original,App.difficulty);
+  }
+
+  renderPassage();
+  updateProgress();
+  show('game');
+}
+
+/* ══ RENDER ══ */
+function renderPassage(){
+  passageEl.innerHTML='';
+  App.tokens.forEach(tok=>{
+    if(!tok.isWord){
+      passageEl.appendChild(document.createTextNode(tok.original));
+      return;
+    }
+    const span=document.createElement('span');
+    span.className='word-token';
+    span.dataset.id=tok.id;
+
+    if(tok.isTarget && !tok.isSolved){
+      span.classList.add('target-word');
+      span.textContent=tok.display;
+      span.addEventListener('click',()=>openInput(tok,span));
+    } else if(tok.isSolved){
+      span.classList.add('solved-word');
+      span.textContent=tok.original;
+    } else {
+      span.textContent=tok.original;
+      if(App.mode==='anagram'){
+        span.addEventListener('click',()=>{
+          // brief green flash — this word is already correct
+          span.style.color='var(--green)';
+          setTimeout(()=>span.style.color='',500);
+          if(App.score>0){ App.score=Math.max(0,App.score-1); refreshStats(); }
+        });
+      }
+    }
+    passageEl.appendChild(span);
+  });
+}
+
+function openInput(tok, spanEl){
+  const wrap=document.createElement('span');
+  wrap.className='word-input-wrap';
+
+  const inp=document.createElement('input');
+  inp.type='text'; inp.className='word-input';
+  inp.value = App.mode==='fill' ? tok.display.replace(/_/g,'') : '';
+  inp.maxLength = tok.original.length+2;
+  inp.style.width = Math.max(72, tok.original.length*16)+'px';
+  inp.style.fontSize = window.getComputedStyle(passageEl).fontSize;
+
+  wrap.appendChild(inp);
+  passageEl.replaceChild(wrap, spanEl);
+  setTimeout(()=>inp.focus(),10);
+
+  const check=()=>{
+    const attempt=inp.value.trim().toLowerCase();
+    const actual=tok.original.toLowerCase();
+    if(attempt===actual){
+      onSuccess(tok, wrap);
+    } else if(attempt===''){
+      passageEl.replaceChild(spanEl, wrap); // revert
+    } else {
+      onMistake(inp);
+    }
+  };
+  inp.addEventListener('blur', check);
+  inp.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ inp.blur(); }
+    else if(e.key==='Escape'){ inp.value=''; inp.blur(); }
+  });
+}
+
+function onSuccess(tok, wrapEl){
+  tok.isSolved=true;
+  App.targetsSolved++;
+  App.streak++;
+  let pts=100;
+  if(App.streak>2) pts+=50;
+  App.score+=pts;
+  refreshStats();
+  Audio.success();
+
+  // floating score
+  const rect=wrapEl.getBoundingClientRect();
+  const fl=document.createElement('div');
+  fl.className='float-score';
+  fl.textContent=`+${pts}`;
+  fl.style.left=rect.left+rect.width/2+'px';
+  fl.style.top =rect.top+window.scrollY-10+'px';
+  document.body.appendChild(fl);
+  setTimeout(()=>fl.remove(), 950);
+
+  // replace with solved span
+  const s=document.createElement('span');
+  s.className='word-token solved-word';
+  s.textContent=tok.original;
+  passageEl.replaceChild(s, wrapEl);
+
+  updateProgress();
+  if(App.targetsSolved>=App.totalTargets) setTimeout(showEnd, 800);
+}
+
+function onMistake(inp){
+  App.mistakes++;
+  App.streak=0;
+  App.score=Math.max(0,App.score-10);
+  refreshStats();
+  Audio.error();
+  inp.classList.remove('shake');
+  void inp.offsetWidth;
+  inp.classList.add('shake');
+  setTimeout(()=>{ inp.value=''; inp.focus(); }, 450);
+}
+
+function giveHint(){
+  const tok=App.tokens.find(t=>t.isTarget&&!t.isSolved);
+  if(!tok) return;
+  App.hintsUsed++; App.streak=0;
+  App.score=Math.max(0,App.score-25);
+  refreshStats(); Audio.click();
+
+  if(App.mode==='fill'){
+    const arr=tok.display.split('');
+    for(let i=0;i<arr.length;i++){
+      if(arr[i]==='_'){ arr[i]=tok.original[i]; break; }
+    }
+    tok.display=arr.join('');
+  } else {
+    tok.display=tok.original.substring(0,2)+tok.display.substring(2);
+  }
+  renderPassage();
+}
+
+function updateProgress(){
+  const pct=(App.targetsSolved/App.totalTargets)*100;
+  progFill.style.width=pct+'%';
+  progLabel.textContent=`Fixed: ${App.targetsSolved} / ${App.totalTargets}`;
+}
+
+/* ══ END SCREEN ══ */
+function showEnd(){
+  Audio.win();
+  const total=App.totalTargets+App.mistakes;
+  const acc=total===0?100:Math.round((App.totalTargets/total)*100);
+  let stars=3;
+  if(acc<80||App.hintsUsed>0) stars=2;
+  if(acc<50||App.hintsUsed>2) stars=1;
+
+  $('end-score').textContent    = App.score;
+  $('end-accuracy').textContent = acc+'%';
+  $('end-heading').textContent  = stars===3?'Perfect! 🌟' : stars===2?'Well Done! 🎉' : 'Nice Try! 💪';
+
+  document.querySelectorAll('.star-el').forEach((s,i)=>{
+    s.className='star-el';
+    if(i<stars) setTimeout(()=>{ s.classList.add('earned'); Audio.tone(400+i*120,'sine',.15); }, 300+i*300);
+  });
+  show('end');
+}
+</script>
+</body>
+</html>
