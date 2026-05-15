@@ -37,31 +37,26 @@
         }
 
         .letter-blank {
-            border-bottom: 3px solid #cbd5e1;
-            width: 2rem;
-            height: 2.5rem;
+            border-bottom: 2px solid #cbd5e1;
+            /* Fluid scaling so it shrinks nicely on mobile */
+            width: clamp(1.2rem, 4vw, 2rem);
+            height: clamp(1.75rem, 6vw, 2.5rem);
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
             font-weight: 800;
             text-transform: uppercase;
-            padding-bottom: 0.25rem;
-            margin: 0 0.25rem;
+            padding-bottom: 0.15rem;
         }
 
         @media (min-width: 640px) {
             .letter-blank {
+                border-bottom: 3px solid #cbd5e1;
                 width: 2.5rem;
                 height: 3rem;
                 font-size: 2rem;
-                margin: 0 0.5rem;
             }
-        }
-
-        .space-blank {
-            width: 1.5rem;
-            border: none;
         }
 
         .key-btn {
@@ -106,47 +101,48 @@
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
+
+        .home-btn-wrap {
+            position: fixed; top: 12px; left: 12px; z-index: 9999;
+        }
+        
+        .home-btn {
+            display: flex; align-items: center; gap: 7px;
+            background: rgba(15,20,40,0.85);
+            border: 2px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            padding: 8px 16px 8px 10px;
+            color: #fff;
+            font-family: 'Boogaloo', 'Fredoka One', cursive, sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(12px);
+            transition: background 0.18s, border-color 0.18s, transform 0.15s;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+            white-space: nowrap;
+        }
+        
+        .home-btn:hover { background: rgba(30,40,80,0.97); border-color: rgba(255,255,255,0.4); transform: scale(1.05); }
+        .home-btn:active { transform: scale(0.96); }
+        .home-btn .hico { font-size: 1.2rem; line-height:1; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
-<style>
-.home-btn-wrap {
-  position: fixed; top: 12px; left: 12px; z-index: 9999;
-}
-.home-btn {
-  display: flex; align-items: center; gap: 7px;
-  background: rgba(15,20,40,0.85);
-  border: 2px solid rgba(255,255,255,0.18);
-  border-radius: 999px;
-  padding: 8px 16px 8px 10px;
-  color: #fff;
-  font-family: 'Boogaloo', 'Fredoka One', cursive, sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(12px);
-  transition: background 0.18s, border-color 0.18s, transform 0.15s;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
-  white-space: nowrap;
-}
-.home-btn:hover { background: rgba(30,40,80,0.97); border-color: rgba(255,255,255,0.4); transform: scale(1.05); }
-.home-btn:active { transform: scale(0.96); }
-.home-btn .hico { font-size: 1.2rem; line-height:1; }
-</style>
-<div class="home-btn-wrap">
-  <a class="home-btn" href="seruseruan.xyz" title="Back to Game Library">
-    <span class="hico">🪐</span> Game Zone
-  </a>
-</div>
 
+    <div class="home-btn-wrap">
+        <a class="home-btn" href="seruseruan.xyz" title="Back to Game Library">
+            <span class="hico">🪐</span> Game Zone
+        </a>
+    </div>
 
     <header class="w-full p-4 flex justify-between items-center bg-slate-800 shadow-md">
-        <h1 class="text-xl md:text-2xl font-bold text-blue-400 tracking-wide">Flag<span class="text-white">Guesser</span></h1>
-        <div class="flex gap-4 text-sm md:text-base font-semibold">
-            <div class="bg-slate-700 px-3 py-1 rounded-md text-emerald-400">Streak: <span id="streak-counter">0</span></div>
-            <div class="bg-slate-700 px-3 py-1 rounded-md text-red-400">Mistakes: <span id="mistake-counter">0</span>/4</div>
+        <h1 class="text-xl md:text-2xl font-bold text-blue-400 tracking-wide pl-32 md:pl-0">Flag<span class="text-white">Guesser</span></h1>
+        <div class="flex gap-2 sm:gap-4 text-xs sm:text-base font-semibold">
+            <div class="bg-slate-700 px-2 sm:px-3 py-1 rounded-md text-emerald-400">Streak: <span id="streak-counter">0</span></div>
+            <div class="bg-slate-700 px-2 sm:px-3 py-1 rounded-md text-red-400">Mistakes: <span id="mistake-counter">0</span>/4</div>
         </div>
     </header>
 
@@ -154,16 +150,14 @@
         
         <!-- Flag Image Container -->
         <div class="flag-container mb-8 relative">
-            <!-- Background pattern for the hidden part of the flag -->
             <div class="absolute inset-0 flex items-center justify-center text-slate-600 opacity-20 text-6xl pointer-events-none">
                 ?
             </div>
-            <!-- The actual flag image controlled via JS -->
             <img id="flag-image" src="" alt="Country Flag" draggable="false">
         </div>
 
         <!-- Word Container -->
-        <div id="word-container" class="flex flex-wrap justify-center mb-10 w-full gap-y-4">
+        <div id="word-container" class="flex flex-wrap justify-center mb-8 sm:mb-10 w-full gap-x-5 gap-y-4 px-2">
             <!-- Blanks will be injected here by JS -->
         </div>
 
@@ -174,7 +168,7 @@
 
     </main>
 
-    <!-- Result Modal Overlay (Hidden by Default) -->
+    <!-- Result Modal Overlay -->
     <div id="result-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center px-4">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700 max-w-sm w-full text-center modal-enter">
             <h2 id="modal-title" class="text-3xl font-bold mb-2"></h2>
@@ -191,7 +185,6 @@
     </div>
 
     <script>
-        // Extensive list of countries with flag CDN codes (Over 150 countries)
         const countries = [
             { name: "AFGHANISTAN", code: "af" }, { name: "ALBANIA", code: "al" }, { name: "ALGERIA", code: "dz" }, { name: "ANDORRA", code: "ad" }, { name: "ANGOLA", code: "ao" },
             { name: "ARGENTINA", code: "ar" }, { name: "ARMENIA", code: "am" }, { name: "AUSTRALIA", code: "au" }, { name: "AUSTRIA", code: "at" }, { name: "AZERBAIJAN", code: "az" },
@@ -226,7 +219,6 @@
             { name: "VENEZUELA", code: "ve" }, { name: "VIETNAM", code: "vn" }, { name: "YEMEN", code: "ye" }, { name: "ZAMBIA", code: "zm" }, { name: "ZIMBABWE", code: "zw" }
         ];
 
-        // QWERTY keyboard layout
         const keyboardLayout = [
             ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
             ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
@@ -234,11 +226,13 @@
         ];
 
         // Game State
+        let availableCountries = []; // Helps prevent repetitions in a single session
         let currentCountry = null;
         let guessedLetters = new Set();
         let mistakes = 0;
         let streak = 0;
         let isGameOver = false;
+        let modalTimeoutId = null; // Tracks the timeout for the modal popup race condition
         const MAX_MISTAKES = 4;
 
         // DOM Elements
@@ -275,26 +269,35 @@
 
         // Initialize a new round
         function initRound() {
+            // Cancel any pending modal timer if user clicks next/enter quickly
+            if (modalTimeoutId) {
+                clearTimeout(modalTimeoutId);
+            }
+
             // Reset state
             guessedLetters.clear();
             mistakes = 0;
             isGameOver = false;
             
-            // Hide modal
+            // Hide modal completely
             resultModal.classList.add('hidden');
             resultModal.classList.remove('flex');
 
-            // Pick random country
-            const randomIndex = Math.floor(Math.random() * countries.length);
-            currentCountry = countries[randomIndex];
+            // Pick random country without repetitions
+            if (availableCountries.length === 0) {
+                availableCountries = [...countries]; // Reset pool if exhausted
+            }
+            const randomIndex = Math.floor(Math.random() * availableCountries.length);
+            currentCountry = availableCountries[randomIndex];
+            availableCountries.splice(randomIndex, 1); // Remove picked country
 
             // Setup UI
             mistakeCounter.textContent = mistakes;
             streakCounter.textContent = streak;
             
-            // Set flag source (using reliable flagcdn)
+            // Set flag source and update clipping instantly to prevent animation leak
             flagImage.src = `https://flagcdn.com/w640/${currentCountry.code}.png`;
-            updateFlagReveal();
+            updateFlagReveal(true);
             
             // Re-render word blanks and keyboard
             renderWord();
@@ -302,28 +305,28 @@
         }
 
         // Update the clip-path of the flag based on mistakes
-        function updateFlagReveal() {
-            // 0 mistakes = Top-left quadrant (1/4)
-            // 1 mistake  = Top half (1/2)
-            // 2 mistakes = Top half + Bottom-left quadrant (3/4)
-            // 3+ mistakes = Full flag (4/4)
-            
+        function updateFlagReveal(isInitial = false) {
             let polygonPath;
             if (mistakes === 0) {
-                // Top-left square
-                polygonPath = 'polygon(0% 0%, 50% 0%, 50% 50%, 0% 50%)';
+                polygonPath = 'polygon(0% 0%, 50% 0%, 50% 50%, 0% 50%)'; // 1/4
             } else if (mistakes === 1) {
-                // Top half rectangle
-                polygonPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%)';
+                polygonPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%)'; // 1/2
             } else if (mistakes === 2) {
-                // "L" shape covering top half and bottom left
-                polygonPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 100%, 0% 100%)';
+                polygonPath = 'polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 100%, 0% 100%)'; // 3/4
             } else {
-                // Full square
-                polygonPath = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+                polygonPath = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)'; // Full
             }
 
-            flagImage.style.clipPath = polygonPath;
+            if (isInitial) {
+                // Disable transition to block flag instantly
+                flagImage.style.transition = 'none';
+                flagImage.style.clipPath = polygonPath;
+                // Force a browser reflow before re-enabling transition
+                void flagImage.offsetWidth; 
+                flagImage.style.transition = ''; // Restores back to CSS stylesheet transition
+            } else {
+                flagImage.style.clipPath = polygonPath;
+            }
         }
 
         
@@ -332,19 +335,18 @@
             wordContainer.innerHTML = '';
             const words = currentCountry.name.split(' ');
             
-            words.forEach((word, wordIndex) => {
+            words.forEach((word) => {
                 const wordDiv = document.createElement('div');
-                wordDiv.className = 'flex justify-center';
+                // Added flex-wrap here to ensure long words break properly on mobile
+                wordDiv.className = 'flex flex-wrap justify-center gap-1 sm:gap-2'; 
                 
                 for (let i = 0; i < word.length; i++) {
                     const letter = word[i];
                     const letterDiv = document.createElement('div');
                     
                     letterDiv.className = 'letter-blank';
-                    // Reveal letter if guessed or if game is over (so user sees answer)
                     if (guessedLetters.has(letter) || isGameOver) {
                         letterDiv.textContent = letter;
-                        // Colorize green if won, red if revealed due to loss
                         if (isGameOver && !guessedLetters.has(letter)) {
                             letterDiv.classList.add('text-red-400');
                         } else {
@@ -356,13 +358,6 @@
                 }
                 
                 wordContainer.appendChild(wordDiv);
-
-                // Add space between words if not the last word
-                if (wordIndex < words.length - 1) {
-                    const spaceDiv = document.createElement('div');
-                    spaceDiv.className = 'space-blank';
-                    wordContainer.appendChild(spaceDiv);
-                }
             });
         }
 
@@ -371,7 +366,6 @@
             if (isGameOver || guessedLetters.has(letter)) return;
 
             guessedLetters.add(letter);
-            
             const btn = document.querySelector(`.key-btn[data-letter="${letter}"]`);
 
             if (currentCountry.name.includes(letter)) {
@@ -384,14 +378,13 @@
                 if(btn) btn.classList.add('wrong');
                 mistakes++;
                 mistakeCounter.textContent = mistakes;
-                updateFlagReveal();
+                updateFlagReveal(false);
                 checkLoseCondition();
             }
         }
 
         
         function checkWinCondition() {
-            // Check if every letter in the country name (excluding spaces) is guessed
             const hasWon = [...currentCountry.name].every(char => char === ' ' || guessedLetters.has(char));
             
             if (hasWon) {
@@ -404,16 +397,16 @@
         function checkLoseCondition() {
             if (mistakes >= MAX_MISTAKES) {
                 isGameOver = true;
-                streak = 0; // Reset streak on loss
+                streak = 0;
                 streakCounter.textContent = streak;
-                renderWord(); // Reveal remaining letters
+                renderWord(); 
                 showModal(false);
             }
         }
 
         function showModal(isWin) {
-            // Small delay to allow the last letter/animation to render
-            setTimeout(() => {
+            // Assign to global variable to allow cancellation if next round runs fast
+            modalTimeoutId = setTimeout(() => {
                 if (isWin) {
                     modalTitle.textContent = "You Got It! 🎉";
                     modalTitle.className = "text-3xl font-bold mb-2 text-emerald-400";
@@ -439,12 +432,14 @@
         // Add Physical Keyboard Support
         document.addEventListener('keydown', (e) => {
             if (isGameOver) {
-                if (e.key === 'Enter') initRound();
+                if (e.key === 'Enter') {
+                    e.preventDefault(); 
+                    initRound();
+                }
                 return;
             }
             
             const key = e.key.toUpperCase();
-            // Check if key is a letter A-Z
             if (/^[A-Z]$/.test(key)) {
                 handleGuess(key);
             }
